@@ -24,28 +24,32 @@ const grid=new THREE.GridHelper(24,48,0x9b9588,0xd0c9bb); grid.position.y=.002; 
 const banana=new THREE.Group();
 const bMat=new THREE.MeshStandardMaterial({color:0xffe135,emissive:0xffa800,emissiveIntensity:.18,roughness:.35,metalness:.05});
 const bCurve=new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-.11,.04,0),
-  new THREE.Vector3(-.05,.015,0),
-  new THREE.Vector3(.04,.03,0),
-  new THREE.Vector3(.10,.09,0)
+  new THREE.Vector3(-.075,.025,0),
+  new THREE.Vector3(-.03,.01,0),
+  new THREE.Vector3(.025,.02,0),
+  new THREE.Vector3(.065,.06,0)
 ]);
-// 아담하고 날씬한 5각 단면 바나나 지오메트리
-const bMesh=new THREE.Mesh(new THREE.TubeGeometry(bCurve,32,.016,5,false),bMat);
+// 소형화된 5각 단면 바나나 지오메트리 (길이 축소)
+const bMesh=new THREE.Mesh(new THREE.TubeGeometry(bCurve,24,.014,5,false),bMat);
 bMesh.castShadow=true; bMesh.receiveShadow=true; banana.add(bMesh);
 // 바나나 꼭지 (Stem)
 const stemMat=new THREE.MeshStandardMaterial({color:0x4d6124,roughness:.6});
-const stemCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.11,.04,0),new THREE.Vector3(-.14,.055,0)]);
-const stemMesh=new THREE.Mesh(new THREE.TubeGeometry(stemCurve,8,.009,5,false),stemMat);
+const stemCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.075,.025,0),new THREE.Vector3(-.095,.035,0)]);
+const stemMesh=new THREE.Mesh(new THREE.TubeGeometry(stemCurve,6,.007,5,false),stemMat);
 stemMesh.castShadow=true; banana.add(stemMesh);
 // 바나나 밑동 팁 (Tip)
 const tipMat=new THREE.MeshStandardMaterial({color:0x221100,roughness:.8});
-const tipCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(.10,.09,0),new THREE.Vector3(.115,.105,0)]);
-const tipMesh=new THREE.Mesh(new THREE.TubeGeometry(tipCurve,8,.008,5,false),tipMat);
+const tipCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(.065,.06,0),new THREE.Vector3(.078,.07,0)]);
+const tipMesh=new THREE.Mesh(new THREE.TubeGeometry(tipCurve,6,.006,5,false),tipMat);
 banana.add(tipMesh);
 // 바나나 노란색 광륜 (Glow)
-const glow=new THREE.Mesh(new THREE.CircleGeometry(.45,36),new THREE.MeshBasicMaterial({color:0xffd60a,transparent:true,opacity:.25,depthWrite:false}));
+const glow=new THREE.Mesh(new THREE.CircleGeometry(.35,32),new THREE.MeshBasicMaterial({color:0xffd60a,transparent:true,opacity:.25,depthWrite:false}));
 glow.rotation.x=-Math.PI/2; glow.position.y=.004; banana.add(glow); scene.add(banana);
-const trailGeo=new THREE.BufferGeometry(); const trail=new THREE.Line(trailGeo,new THREE.LineDashedMaterial({color:0xffd60a,dashSize:.06,gapSize:.06,transparent:true,opacity:.85})); scene.add(trail); const trailPts=[];
+
+// 선명한 로봇 이동 궤적 선 (Trail Line)
+const trailGeo=new THREE.BufferGeometry();
+const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xffd60a,transparent:true,opacity:.9}));
+scene.add(trail); const trailPts=[];
 function placeBanana(x,y){telemetry.banana={x,y}; banana.position.set(x,0,-y); pulse=1;}
 let pulse=0; placeBanana(1.2,0.6);
 const ray=new THREE.Raycaster(); let down=null;
@@ -149,7 +153,7 @@ let lastRender=performance.now();
 function render(){requestAnimationFrame(render);const now=performance.now(),rdt=Math.min(.05,(now-lastRender)/1000);lastRender=now;const b=telemetry.body;if(b&&b.key==='company'){b.update3D(rdt);b.draw();controls.update();renderer.render(scene,camera);const st=b.state();$('fCmd').textContent=`가격 ${st.cmd[0].toFixed(1)} · 광고 ${Math.round(st.cmd[1])}`;$('fDist').textContent=`현금 ${Math.round(st.cash).toLocaleString()}`;$('fPol').textContent=String(st.day);$('count').textContent=st.bankrupt?'파산':`${st.day}일`;$('statusText').textContent=st.bankrupt?'파산 · 리셋':'운영 중';return;}
 if(b){const st=b.state();
     if(follow){const target=new THREE.Vector3(st.x,b.camHeight??.25,-st.y);const before=controls.target.clone();controls.target.lerp(target,.08);camera.position.add(controls.target.clone().sub(before));}
-    if(!trailPts.length||Math.hypot(st.x-trailPts.at(-1).x,-st.y-trailPts.at(-1).z)>.03){trailPts.push(new THREE.Vector3(st.x,.01,-st.y));if(trailPts.length>800)trailPts.shift();trail.geometry.dispose();trail.geometry=new THREE.BufferGeometry().setFromPoints(trailPts);trail.computeLineDistances();}
+    if(!trailPts.length||Math.hypot(st.x-trailPts.at(-1).x,-st.y-trailPts.at(-1).z)>.02){trailPts.push(new THREE.Vector3(st.x,.015,-st.y));if(trailPts.length>600)trailPts.shift();trail.geometry.setFromPoints(trailPts);}
     const a=telemetry.activity||{},s=telemetry.stimulus||{};
     $('fIn').textContent=`${fmt(s.olfactory_left)} · ${fmt(s.olfactory_right)}`;$('fTouch').textContent=`${fmt(s.mechanosensory_left)} · ${fmt(s.mechanosensory_right)}`;$('fAL').textContent=`${pct(a.scentLeft)}% · ${pct(a.scentRight)}%`;$('fDN').textContent=`${(100*(((a.left||0)+(a.right||0))/2)).toFixed(2)}%`;$('fMot').textContent=`${(100*(a.motorLeft||0)).toFixed(2)} · ${(100*(a.motorRight||0)).toFixed(2)}%`;
     $('fCmd').textContent=`${fmt(st.cmd[0])} m/s · ${fmt(st.cmd[2])} rad/s`;$('fDist').textContent=`${fmt(st.distance)} m`;$('fPol').textContent=st.policyCalls.toLocaleString();$('fSpk').textContent=(a.spikes||0).toLocaleString();

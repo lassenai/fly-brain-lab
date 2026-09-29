@@ -1,4 +1,4 @@
-// 초파리 뇌 걷기 — 3D 초파리 시뮬레이터 + 실시간 발화 뇌. 뇌: MaleCNS 2026.
+// 초파리 뇌 걷기 — 3D 초파리(Fruitfly 3D Mesh) 시뮬레이터 + 실시간 발화 뇌. 뇌: MaleCNS 2026.
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createBrainView} from './brain-view.js';
@@ -46,112 +46,143 @@ const grid = new THREE.GridHelper(12, 24, 0x334155, 0x1e293b);
 grid.position.y = 0.002;
 scene.add(grid);
 
-// ---- 3D 초파리 모델 (fruitfly 3D 파츠 조립) ----
-function create3DFlyModel() {
+// ---- 3D fruitfly 메쉬 모델 (flybody/fruitfly.xml 파츠 구조 분석 기반 구축) ----
+function createFruitFly3DMesh() {
   const flyGroup = new THREE.Group();
-  const matBody = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5, metalness: 0.2 });
-  const matHead = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
-  const matEye = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.2, emissive: 0xb45309, emissiveIntensity: 0.3 });
-  const matWing = new THREE.MeshStandardMaterial({ color: 0x93c5fd, transparent: true, opacity: 0.45, roughness: 0.1, metalness: 0.8 });
-  const matLeg = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6 });
+  
+  // flybody 생체 파츠 메인 재질 (Thorax, Head, Abdomen, Wings, Legs)
+  const matThorax = new THREE.MeshStandardMaterial({ color: 0x3a4356, roughness: 0.5, metalness: 0.3 });
+  const matHead = new THREE.MeshStandardMaterial({ color: 0x2b3342, roughness: 0.4 });
+  const matRedEye = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.25, emissive: 0xb45309, emissiveIntensity: 0.35 });
+  const matAbdomen = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6, metalness: 0.1 });
+  const matAbdomenStripe = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+  const matWingMembrane = new THREE.MeshStandardMaterial({ color: 0x93c5fd, transparent: true, opacity: 0.5, roughness: 0.1, metalness: 0.9, side: THREE.DoubleSide });
+  const matLeg = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
 
-  // 가슴 (Thorax)
-  const thorax = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 12), matBody);
-  thorax.scale.set(1, 0.9, 1.2);
-  thorax.position.y = 0.14;
+  // 1. 가슴 (Thorax_body)
+  const thorax = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 16), matThorax);
+  thorax.scale.set(1.0, 0.92, 1.25);
+  thorax.position.set(0, 0.14, 0);
   thorax.castShadow = true;
   flyGroup.add(thorax);
 
-  // 머리 (Head)
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 12), matHead);
-  head.position.set(0, 0.14, 0.14);
-  head.castShadow = true;
-  flyGroup.add(head);
+  // 2. 머리 (Head_body + Ocelli)
+  const headGroup = new THREE.Group();
+  headGroup.position.set(0, 0.14, 0.15);
 
-  // 붉은 복안 2개 (Compound Eyes)
-  const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.04, 12, 10), matEye);
-  eyeL.position.set(0.055, 0.16, 0.16);
-  flyGroup.add(eyeL);
-  const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.04, 12, 10), matEye);
-  eyeR.position.set(-0.055, 0.16, 0.16);
-  flyGroup.add(eyeR);
+  const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.082, 18, 14), matHead);
+  headMesh.scale.set(1.1, 0.9, 0.95);
+  headMesh.castShadow = true;
+  headGroup.add(headMesh);
 
-  // 배 (Abdomen - 줄무늬 마디)
-  const abdomen = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.32, 16), matBody);
-  abdomen.rotation.x = -Math.PI / 2 + 0.2;
-  abdomen.position.set(0, 0.12, -0.22);
-  abdomen.castShadow = true;
-  flyGroup.add(abdomen);
+  // 붉은 복안 2개 (Head_red Compound Eyes)
+  const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.042, 14, 12), matRedEye);
+  eyeL.position.set(0.056, 0.015, 0.02);
+  headGroup.add(eyeL);
 
-  // 날개 2개 (Wings)
-  const wingGeo = new THREE.PlaneGeometry(0.14, 0.38);
-  wingGeo.translate(0, 0.19, 0);
+  const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.042, 14, 12), matRedEye);
+  eyeR.position.set(-0.056, 0.015, 0.02);
+  headGroup.add(eyeR);
 
-  const wingL = new THREE.Mesh(wingGeo, matWing);
-  wingL.rotation.set(-Math.PI / 2 + 0.1, 0.3, -0.2);
-  wingL.position.set(0.06, 0.22, -0.05);
-  flyGroup.add(wingL);
-
-  const wingR = new THREE.Mesh(wingGeo, matWing);
-  wingR.rotation.set(-Math.PI / 2 + 0.1, -0.3, 0.2);
-  wingR.position.set(-0.06, 0.22, -0.05);
-  flyGroup.add(wingR);
-
-  // 더듬이 2개 (Antennae) + 자극 발광 노드
+  // 더듬이 2개 (Antenna_left/right_body) + 냄새 자극 노드
   const antMatL = new THREE.MeshBasicMaterial({ color: 0xffd60a });
   const antMatR = new THREE.MeshBasicMaterial({ color: 0xffd60a });
-  
-  const antL = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 8), antMatL);
-  antL.position.set(0.035, 0.18, 0.22);
-  flyGroup.add(antL);
 
-  const antR = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 8), antMatR);
-  antR.position.set(-0.035, 0.18, 0.22);
-  flyGroup.add(antR);
+  const antL = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.003, 0.08), matHead);
+  antL.rotation.set(-0.4, 0.2, -0.3);
+  antL.position.set(0.025, 0.04, 0.07);
+  headGroup.add(antL);
 
-  // 다리 6개 (3D Tripod Legs)
+  const antR = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.003, 0.08), matHead);
+  antR.rotation.set(-0.4, -0.2, 0.3);
+  antR.position.set(-0.025, 0.04, 0.07);
+  headGroup.add(antR);
+
+  const antTipL = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 8), antMatL);
+  antTipL.position.set(0.04, 0.07, 0.1);
+  headGroup.add(antTipL);
+
+  const antTipR = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 8), antMatR);
+  antTipR.position.set(-0.04, 0.07, 0.1);
+  headGroup.add(antTipR);
+
+  flyGroup.add(headGroup);
+
+  // 3. 배 (Abdomen 1~8 Segments)
+  const abdomenGroup = new THREE.Group();
+  abdomenGroup.position.set(0, 0.13, -0.12);
+
+  for (let s = 0; s < 6; s++) {
+    const segMat = s % 2 === 0 ? matAbdomen : matAbdomenStripe;
+    const radius = 0.125 * Math.sin(((s + 1) / 7) * Math.PI);
+    const seg = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius * 0.9, 0.045, 16), segMat);
+    seg.rotation.x = -Math.PI / 2 + 0.15;
+    seg.position.set(0, -s * 0.015, -s * 0.042);
+    seg.castShadow = true;
+    abdomenGroup.add(seg);
+  }
+  flyGroup.add(abdomenGroup);
+
+  // 4. 날개 2개 (Wing_left/right_membrane)
+  const wingGeo = new THREE.PlaneGeometry(0.14, 0.42);
+  wingGeo.translate(0, 0.21, 0);
+
+  const wingL = new THREE.Mesh(wingGeo, matWingMembrane);
+  wingL.rotation.set(-Math.PI / 2 + 0.08, 0.35, -0.2);
+  wingL.position.set(0.065, 0.22, -0.06);
+  flyGroup.add(wingL);
+
+  const wingR = new THREE.Mesh(wingGeo, matWingMembrane);
+  wingR.rotation.set(-Math.PI / 2 + 0.08, -0.35, 0.2);
+  wingR.position.set(-0.065, 0.22, -0.06);
+  flyGroup.add(wingR);
+
+  // 5. 다리 6개 (T1, T2, T3 Legs: Coxa, Femur, Tibia, Tarsus)
   const legs = [];
   for (let i = 0; i < 6; i++) {
     const side = i % 2 === 0 ? 1 : -1;
-    const row = Math.floor(i / 2); // 0:앞, 1:중, 2:뒤
+    const row = Math.floor(i / 2); // 0:앞다리(T1), 1:중다리(T2), 2:뒷다리(T3)
     const legGroup = new THREE.Group();
-    
-    // 허벅지 + 정아리 마디
-    const femur = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.008, 0.14), matLeg);
+
+    // Coxa + Femur (허벅지)
+    const femur = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.007, 0.15), matLeg);
     femur.position.set(side * 0.07, 0, 0);
-    femur.rotation.z = -side * 0.8;
+    femur.rotation.z = -side * 0.82;
+    femur.castShadow = true;
     legGroup.add(femur);
 
-    const tibia = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.004, 0.16), matLeg);
-    tibia.position.set(side * 0.13, -0.08, 0);
-    tibia.rotation.z = side * 0.3;
+    // Tibia + Tarsus (정아리)
+    const tibia = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.003, 0.17), matLeg);
+    tibia.position.set(side * 0.135, -0.085, 0);
+    tibia.rotation.z = side * 0.35;
+    tibia.castShadow = true;
     legGroup.add(tibia);
 
-    legGroup.position.set(side * 0.05, 0.12, 0.08 - row * 0.09);
+    legGroup.position.set(side * 0.05, 0.12, 0.09 - row * 0.095);
     flyGroup.add(legGroup);
     legs.push({ group: legGroup, side, row });
   }
 
   scene.add(flyGroup);
-  return { root: flyGroup, wingL, wingR, antL, antR, antMatL, antMatR, legs };
+  return { root: flyGroup, wingL, wingR, antTipL, antTipR, antMatL, antMatR, legs };
 }
 
-const fly3D = create3DFlyModel();
+const fly3D = createFruitFly3DMesh();
 
 // ---- 3D 바나나 모델 ----
 const bananaGroup = new THREE.Group();
 const bMat = new THREE.MeshStandardMaterial({ color: 0xffe135, emissive: 0xffa800, emissiveIntensity: 0.2, roughness: 0.3 });
 const bCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-0.09, 0.03, 0),
-  new THREE.Vector3(-0.04, 0.01, 0),
-  new THREE.Vector3(0.03, 0.02, 0),
-  new THREE.Vector3(0.08, 0.07, 0)
+  new THREE.Vector3(-0.075, 0.025, 0),
+  new THREE.Vector3(-0.03, 0.01, 0),
+  new THREE.Vector3(0.025, 0.02, 0),
+  new THREE.Vector3(0.065, 0.06, 0)
 ]);
-const bMesh = new THREE.Mesh(new THREE.TubeGeometry(bCurve, 24, 0.015, 5, false), bMat);
+const bMesh = new THREE.Mesh(new THREE.TubeGeometry(bCurve, 24, 0.014, 5, false), bMat);
 bMesh.castShadow = true;
 bananaGroup.add(bMesh);
 
-const bGlow = new THREE.Mesh(new THREE.CircleGeometry(0.4, 32), new THREE.MeshBasicMaterial({ color: 0xffd60a, transparent: true, opacity: 0.25, depthWrite: false }));
+const bGlow = new THREE.Mesh(new THREE.CircleGeometry(0.35, 32), new THREE.MeshBasicMaterial({ color: 0xffd60a, transparent: true, opacity: 0.25, depthWrite: false }));
 bGlow.rotation.x = -Math.PI / 2;
 bGlow.position.y = 0.003;
 bananaGroup.add(bGlow);
@@ -280,11 +311,11 @@ function step(dt) {
   const c = activity?.command || { forward: 0, turn: 0 };
   state.v += (c.forward * 1.5 - state.v) * Math.min(1, dt * 5);
   state.w += (c.turn - state.w) * Math.min(1, dt * 5);
-  
+
   state.yaw += state.w * dt;
   state.x += Math.cos(state.yaw) * state.v * dt;
   state.y += Math.sin(state.yaw) * state.v * dt;
-  
+
   state.x = Math.max(-2.8, Math.min(2.8, state.x));
   state.y = Math.max(-2.8, Math.min(2.8, state.y));
 
