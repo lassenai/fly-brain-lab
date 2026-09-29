@@ -15,7 +15,7 @@ export async function createBrainView(host,{low=false,onProgress,dir='./brain',a
   tissue.translate(-center.x,-center.y,-center.z);tissue.scale(scale,-scale,-scale);tissue.computeVertexNormals();tissue.computeBoundingBox();
   const positions=new Float32Array(raw.length);
   for(let i=0;i<count;i++){positions[3*i]=(raw[3*i]-center.x)*scale;positions[3*i+1]=-(raw[3*i+1]-center.y)*scale;positions[3*i+2]=-(raw[3*i+2]-center.z)*scale;}
-  const scene=new THREE.Scene();scene.background=new THREE.Color('#0e121a');
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#141009');
   const camera=new THREE.PerspectiveCamera(38,1,.01,30);camera.position.set(0,.05,3.8);
   const renderer=new THREE.WebGLRenderer({antialias:!low});renderer.setPixelRatio(low?.7:Math.min(devicePixelRatio,1.5));renderer.localClippingEnabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
   const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=1.4;controls.maxDistance=7;controls.enablePan=false;controls.autoRotate=!!autoRotate;controls.autoRotateSpeed=.55;controls.update();

@@ -9,10 +9,10 @@ const state = { x: 0, y: 0, yaw: Math.PI / 2, v: 0, w: 0, legPhase: [0, 0], coll
 const lab = { antenna: 'normal', range: 3.0, light: 0.45 };
 let activity = null, ready = false, cut = false, lastT = performance.now(), brainView = null, autoRotate = true;
 
-// ---- Three.js 3D 무대 구축 (fly-bodies 라이트 스타일) ----
+// ---- Three.js 3D 무대 구축 (메탈골드 테마) ----
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#f5f2eb');
-scene.fog = new THREE.Fog('#f5f2eb', 8, 25);
+scene.background = new THREE.Color('#1a150d');
+scene.fog = new THREE.Fog('#1a150d', 8, 25);
 
 const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 50);
 camera.position.set(0, 1.8, 2.5);
@@ -28,21 +28,21 @@ controls.maxPolarAngle = Math.PI / 2 - 0.02;
 controls.minDistance = 0.8;
 controls.maxDistance = 8.0;
 
-// 조명
-scene.add(new THREE.HemisphereLight(0xffffff, 0xd0cbbd, 1.8));
-const sun = new THREE.DirectionalLight(0xfff8eb, 2.2);
+// 조명 (따뜻한 골드 앰비언트)
+scene.add(new THREE.HemisphereLight(0xfff8e7, 0x3d301c, 1.8));
+const sun = new THREE.DirectionalLight(0xffecc4, 2.2);
 sun.position.set(-3, 6, 2);
 sun.castShadow = true;
 sun.shadow.mapSize.set(1024, 1024);
 scene.add(sun);
 
-// 바닥 & 그리드 (fly-bodies 동일 스타일)
-const floor = new THREE.Mesh(new THREE.CircleGeometry(12, 64), new THREE.MeshStandardMaterial({ color: 0xe5e0d4, roughness: 0.9, metalness: 0.05 }));
+// 바닥 & 그리드 (메탈골드 바닥 테마)
+const floor = new THREE.Mesh(new THREE.CircleGeometry(12, 64), new THREE.MeshStandardMaterial({ color: 0x2b2214, roughness: 0.7, metalness: 0.25 }));
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-const grid = new THREE.GridHelper(24, 48, 0x9b9588, 0xd0c9bb);
+const grid = new THREE.GridHelper(24, 48, 0xd4af37, 0x4a3b22);
 grid.position.y = 0.002;
 scene.add(grid);
 
@@ -298,7 +298,12 @@ setInterval(() => { if (ready) worker.postMessage({ type: 'stimulus', value: sti
 $('clear').onclick = () => { bananaGroup.visible = false; };
 for (const b of document.querySelectorAll('[data-antenna]')) b.onclick = () => { for (const o of document.querySelectorAll('[data-antenna]')) o.setAttribute('aria-pressed', String(o === b)); lab.antenna = b.dataset.antenna; };
 $('cut').onclick = () => { cut = !cut; $('cut').setAttribute('aria-pressed', String(cut)); $('cut').textContent = cut ? '시냅스 켜기' : '시냅스 끄기'; worker.postMessage({ type: 'cut', value: cut }); };
-$('rotate').onclick = () => { autoRotate = !autoRotate; $('rotate').setAttribute('aria-pressed', String(autoRotate)); brainView?.setAutoRotate?.(autoRotate); };
+$('rotate').onclick = () => {
+  autoRotate = !autoRotate;
+  $('rotate').setAttribute('aria-pressed', String(autoRotate));
+  $('rotate').textContent = autoRotate ? '회전 멈춤' : '회전 시작';
+  brainView?.setAutoRotate?.(autoRotate);
+};
 $('reset').onclick = () => {
   Object.assign(state, { x: 0, y: 0, yaw: Math.PI / 2, v: 0, w: 0, legPhase: [0, 0], collected: 0, respawnAt: 0, pulse: 1 });
   placeBanana3D(0.5, -0.9);
