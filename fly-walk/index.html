@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>초파리 뇌 걷기 — 2D 시뮬레이션</title>
+  <meta name="description" content="2026 수컷 초파리 뇌 배선 지도(MaleCNS)를 물통(LIF) 모델로 구동하여 2D 초파리를 걷게 하는 시뮬레이터입니다.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Pretendard Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: #0b0f19; color: #e2e8f0; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    header h1 { font-size: 1.2rem; font-weight: 700; color: #f8fafc; }
+    header h1 span { color: #38bdf8; font-size: 0.9rem; margin-left: 8px; font-weight: 400; }
+    .status-bar { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #94a3b8; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #64748b; }
+    .dot.live { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    
+    main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+    .card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; position: relative; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .card-title { font-weight: 600; font-size: 1rem; color: #cbd5e1; }
+
+    .canvas-container { position: relative; width: 100%; aspect-ratio: 1; background: #020617; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); }
+    canvas#c { width: 100%; height: 100%; display: block; cursor: crosshair; }
+    #brain { width: 100%; height: 100%; background: #020617; border-radius: 8px; }
+
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    button { background: rgba(51, 65, 85, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); color: #f1f5f9; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+    button:hover { background: rgba(71, 85, 105, 1); border-color: #38bdf8; }
+    button[aria-pressed="true"] { background: #0284c7; border-color: #38bdf8; color: #fff; }
+
+    .antenna-group { display: flex; gap: 4px; align-items: center; }
+    .antenna-group span { font-size: 0.8rem; color: #94a3b8; margin-right: 4px; }
+
+    #loading { position: fixed; inset: 0; background: rgba(11, 15, 25, 0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; backdrop-filter: blur(8px); }
+    #loading div { font-size: 1.1rem; color: #f8fafc; font-weight: 600; }
+    progress { width: 240px; height: 8px; border-radius: 4px; overflow: hidden; }
+    #progText { font-size: 0.85rem; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div>초파리 뇌 배선 로딩 중...</div>
+    <progress id="prog" value="0" max="100"></progress>
+    <small id="progText">준비 중...</small>
+  </div>
+
+  <header>
+    <h1>초파리 뇌 걷기 시뮬레이터 <span>MaleCNS 2026 Connectome</span></h1>
+    <div class="status-bar">
+      <div id="dot" class="dot"></div>
+      <span id="statusText">초기화 중...</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🪰 2D 경기장 (바나나 클릭하여 먹이 배치)</div>
+      </div>
+      <div class="canvas-container">
+        <canvas id="c" width="800" height="800"></canvas>
+      </div>
+      <div class="controls">
+        <div class="antenna-group">
+          <span>더듬이:</span>
+          <button type="button" data-antenna="normal" aria-pressed="true">정상</button>
+          <button type="button" data-antenna="noLeft">왼쪽 제거</button>
+          <button type="button" data-antenna="noRight">오른쪽 제거</button>
+          <button type="button" data-antenna="swap">반전</button>
+        </div>
+        <button type="button" id="clear">바나나 치우기</button>
+        <button type="button" id="reset">초기화</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🧠 3D 초파리 뇌 신경망 실시간 발화</div>
+      </div>
+      <div class="canvas-container">
+        <div id="brain"></div>
+      </div>
+      <div class="controls">
+        <button type="button" id="cut" aria-pressed="false">시냅스 끄기</button>
+        <button type="button" id="rotate" aria-pressed="true">회전 멈춤/시작</button>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

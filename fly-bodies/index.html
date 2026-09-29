@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>하나의 뇌, 다채로운 몸 — L@SSEN AI Physical AI 실험실</title>
+  <meta name="description" content="2026 수컷 초파리 뇌 배선을 물통(LIF) 모델로 돌리고 로봇 개, 오리, 휴머노이드를 조종하는 L@SSEN AI Physical AI 실험실입니다.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ctext y='32' font-size='32'%3E🐕%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <div id="loading">
+    <div>몸을 바꾸는 중…</div>
+    <progress id="prog" value="0" max="100"></progress>
+    <small id="progText"></small>
+  </div>
+
+  <header>
+    <a class="brand" href="https://www.youtube.com/@LASSEN-AI" target="_blank" rel="noopener">
+      <img src="/brand/lassen.jpg" alt="L@SSEN 현판">
+      <div>
+        <b>L@SSEN <em>AI</em></b>
+        <small>Link, AI, Solution · Physical AI</small>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="partner-logos">
+        <img src="/brand/nsu_ai_procurement.png" alt="남서울대학교 AI공공조달학과" class="partner-logo">
+        <img src="/brand/nsu_ai_meta.png" alt="남서울대학교 AI메타융합학과" class="partner-logo">
+      </div>
+      <a class="sub" href="https://www.youtube.com/@LASSEN-AI?sub_confirmation=1" target="_blank" rel="noopener">▶ 구독하기</a>
+    </div>
+  </header>
+
+  <main>
+    <p class="kicker">PHYSICAL AI · 초파리 뇌 배선 지도 (MALE CNS 2026)</p>
+    <h1>하나의 뇌, <em>다채로운 몸.</em></h1>
+    <p class="lede">2026년 9월 공개된 수컷 초파리 뇌 배선을 브라우저에서 물통(LIF) 모델로 돌리고, 로봇 개·마이크로덕·휴머노이드를 조종합니다. 탭으로 몸과 환경을 바꿔도 뇌는 그대로입니다.</p>
+
+    <!-- 몸 선택 탭 -->
+    <div class="tabs">
+      <button type="button" class="tab" data-body="go1" aria-pressed="true">🐕 유니트리 Go1 <small>로봇 개 (관절 12개)</small></button>
+      <button type="button" class="tab" data-body="soccer_kit">⚽ 로봇 사커 킷 <small>옴니휠 로봇 (관절 4개)</small></button>
+      <button type="button" class="tab" data-body="duck">🦆 마이크로덕 <small>오리 로봇 (관절 14개)</small></button>
+      <button type="button" class="tab" data-body="g1">🤖 유니트리 G1 <small>휴머노이드 (관절 29개)</small></button>
+      <button type="button" class="tab" data-body="bh">🤖 버클리 휴머노이드 <small>휴머노이드 (관절 12개)</small></button>
+      <button type="button" class="tab" data-body="t1">🤖 부스터 T1 <small>휴머노이드 (관절 23개)</small></button>
+      <button type="button" class="tab" data-body="company">🏢 AI 네이티브 회사 <small>비즈니스 시뮬레이터</small></button>
+    </div>
+    <p class="bodyinfo" id="bodyInfo"></p>
+
+    <!-- 로봇 관절 게이지 -->
+    <div class="jointbox">
+      <span class="label" id="jointLabel">로봇 관절 12개 (강화학습 정책이 매 0.02초 정하는 목표)</span>
+      <div id="joints"></div>
+    </div>
+
+    <!-- 환경 선택 탭 -->
+    <div class="tabs envs">
+      <span class="label">환경:</span>
+      <button type="button" class="tab mini" data-env="flat" aria-pressed="true">평지</button>
+      <button type="button" class="tab mini" data-env="boxes">장애물 상자</button>
+      <button type="button" class="tab mini" data-env="corridor">벽 통로</button>
+      <button type="button" class="tab mini" data-env="slope">경사 10°</button>
+      <button type="button" class="tab mini" data-env="stairs">계단 5cm×3</button>
+    </div>
+    <p class="bodyinfo" id="envNote"></p>
+
+    <!-- 3D 무대 & 뇌 시각화 듀오 패널 -->
+    <div class="duo">
+      <div class="panel">
+        <div class="panel-top">
+          <b id="bodyStat">유니트리 Go1</b>
+          <span class="status"><i id="dot"></i><span id="statusText">작동 중</span></span>
+          <span class="count" id="count"></span>
+        </div>
+        <div id="world"></div>
+        <div id="chartHost" class="charthost" hidden></div>
+        <div class="hint" id="sceneHint"><b>💡 클릭하여 바나나 놓기</b>화면을 눌러 바나나 위치를 이동시키세요.</div>
+        <div class="hint" id="coHint" hidden><b>🏢 AI 회사 시뮬레이션</b>전진 명령=광고비, 회전 명령=가격 설정</div>
+      </div>
+      <div class="panel brain-panel">
+        <div class="panel-top brain-panel-top">
+          <b id="brainTitle">초파리 뇌 · 실시간 발화</b>
+          <span id="brainStat">뉴런 166,700 · 운동뉴런 815</span>
+        </div>
+        <div id="brain"></div>
+        <div class="legend" id="legendBox">
+          <span><i style="background:#ffb020"></i>후각</span>
+          <span><i style="background:#ffd60a"></i>투사뉴런</span>
+          <span><i style="background:#ff7a3d"></i>하강뉴런</span>
+          <span><i style="background:#fff176"></i>운동뉴런</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 실시간 텔레메트리 바 -->
+    <div class="flow">
+      <div><small>냄새 (L · R)</small><b id="fIn">0.00 · 0.00</b><i>센서 자극</i></div>
+      <div><small>촉각 (L · R)</small><b id="fTouch">0.00 · 0.00</b><i>더듬이 충돌</i></div>
+      <div><small>ALPN 투사뉴런</small><b id="fAL">0% · 0%</b><i>냄새 인식</i></div>
+      <div><small>DN 하강뉴런</small><b id="fDN">0.00%</b><i>뇌→척수 명령</i></div>
+      <div><small>MN 운동뉴런</small><b id="fMot">0.00 · 0.00%</b><i>발화율 (좌·우)</i></div>
+      <div><small>틱당 발화수</small><b id="fSpk">0</b><i>실시간 발화</i></div>
+      <div><small>명령 (전진·회전)</small><b id="fCmd">0.00 m/s</b><i>디코더 출력</i></div>
+      <div><small>이동 거리 / 현금</small><b id="fDist">0.00 m</b><i>누적</i></div>
+      <div><small>정책 호출</small><b id="fPol">0</b><i>스텝 수</i></div>
+    </div>
+
+    <!-- 두뇌 교체 탭 -->
+    <div class="tabs brains">
+      <span class="label">두뇌 선택:</span>
+      <button type="button" class="tab mini" data-brain="fly" aria-pressed="true">🪰 초파리 뇌 (복사)</button>
+      <button type="button" class="tab mini" data-brain="rule">📏 규칙 두뇌</button>
+      <button type="button" class="tab mini" data-brain="random">🎲 무작위 두뇌</button>
+      <button type="button" class="tab mini" data-brain="custom">✍️ 내 두뇌 (코드)</button>
+    </div>
+    <p class="bodyinfo" id="brainNote"></p>
+    <div class="custombox" id="customBox" hidden>
+      <textarea id="customCode" rows="10"></textarea>
+      <div class="row">
+        <button type="button" class="primary" id="customApply">내 두뇌 적용하기</button>
+        <span class="hint" id="brainMsg" role="status"></span>
+      </div>
+    </div>
+
+    <!-- 조종 컨트롤 -->
+    <div class="controls">
+      <span class="label">조종 & 실험:</span>
+      <button type="button" id="reset">위치 리셋</button>
+      <button type="button" id="clear">바나나 치우기</button>
+      <button type="button" id="pause">일시정지</button>
+      <button type="button" id="cut" aria-pressed="false">시냅스 끄기</button>
+      <button type="button" id="follow" aria-pressed="true">카메라 추적</button>
+      <span class="label" style="margin-left:12px">더듬이:</span>
+      <button type="button" data-antenna="normal" aria-pressed="true">정상</button>
+      <button type="button" data-antenna="noLeft">왼쪽 절제</button>
+      <button type="button" data-antenna="swap">교차 연결</button>
+      <span class="label" style="margin-left:12px">냄새 자극:</span>
+      <button type="button" data-scent="-1">왼쪽 ↖</button>
+      <button type="button" data-scent="1">오른쪽 ↗</button>
+    </div>
+
+    <!-- 두뇌 성적표 -->
+    <div class="evalbox">
+      <div class="evalhead">
+        <div>
+          <h2>두뇌 성적표 (환경 5개 평가)</h2>
+          <p class="hint">현재 장착된 두뇌와 몸으로 5개 환경을 순차 시험하여 바나나 수집 및 안정성을 채점합니다.</p>
+        </div>
+        <div class="evalctl">
+          <label>환경별 시간: <input id="evalSecs" type="number" value="30"> 초</label>
+          <button type="button" class="primary" id="evalBtn">성적표 시작</button>
+          <button type="button" id="evalStop" hidden>중단</button>
+          <button type="button" id="evalCopy">📋 결과 복사</button>
+        </div>
+      </div>
+      <p class="bodyinfo" id="evalMsg" style="margin-top:8px"></p>
+      <table class="evaltable">
+        <thead>
+          <tr>
+            <th id="evalH1">환경</th>
+            <th id="evalH2">바나나</th>
+            <th id="evalH3">넘어짐</th>
+            <th id="evalH4">이동</th>
+          </tr>
+        </thead>
+        <tbody id="evalRows"></tbody>
+      </table>
+    </div>
+
+    <div class="honest">
+      - 뇌 배선은 진짜 2026 MaleCNS 수컷 초파리 배선(뉴런 166,700개)이며 물통(LIF) 모델로 동작합니다.<br>
+      - 걸음과 균형은 공개 강화학습 정책이 만들고, 초파리 뇌는 방향만 정합니다.
+    </div>
+
+    <footer>
+      <p class="mission">Agentic AI &amp; Physical AI 발전의 밑바탕 - L@SSEN AI</p>
+    </footer>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
