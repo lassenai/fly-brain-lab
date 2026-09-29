@@ -54,7 +54,13 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
     if(cfg.obs==='g1'){phase=phase.map(p=>{const v=p+phaseDt;return ((v+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;});}
     const p=pose(); if(prev)distance+=Math.hypot(p.x-prev.x,p.y-prev.y); prev=p;
     const upz=data.site_xmat[9*imu+8]; fallen=p.z<cfg.minZ||upz<cfg.minUp; sync();}
-  function setCommand(forward,turn){const targetVx=Math.max(0,Math.min(0.6,forward/0.24))*cfg.cmdScale.vx, targetWz=Math.max(-1,Math.min(1,turn/0.7))*cfg.cmdScale.wz; cmd[0]+=0.25*(targetVx-cmd[0]); cmd[2]+=0.25*(targetWz-cmd[2]);}
+  function setCommand(forward,turn){
+    const targetVx=Math.max(0,Math.min(0.6,forward/0.24))*cfg.cmdScale.vx;
+    const rawWz=Math.abs(turn)<0.08?0:Math.max(-1,Math.min(1,turn/0.7))*cfg.cmdScale.wz;
+    cmd[0]+=0.3*(targetVx-cmd[0]);
+    cmd[2]+=0.4*(rawWz-cmd[2]);
+    if(rawWz===0&&Math.abs(cmd[2])<0.02)cmd[2]=0;
+  }
   function dispose(){scene.remove(root);try{data.delete();model.delete();vfs.delete();}catch(e){}session.release?.().catch?.(()=>{});}
   reset();
   return {key:cfg.key,reset,controlStep,setCommand,pose,root,dispose,ctrlDt:cfg.ctrlDt,camDist:cfg.camDist,camHeight:cfg.camHeight,
@@ -63,11 +69,11 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
 }
 export const GO1_CFG={key:'go1',shell:{body:'trunk',type:'box',size:'0.2 0.07 0.06'},name:'유니트리 Go1 로봇 개',xml:'./robots/go1/go1.xml',assetsDir:'./robots/go1/assets/',policy:'./policies/go1_policy.onnx',
   simDt:.004,ctrlDt:.02,actionScale:.5,keyframe:'home',rootBody:'trunk',imuSite:'imu',linvelSensor:'local_linvel',gyroSensor:'gyro',obs:'go1',
-  cmdScale:{vx:.7,wz:1.5},minZ:.12,minUp:.45,accent:['hip'],color:0x8a94a8,camDist:2.6,camHeight:.25,
+  cmdScale:{vx:.7,wz:1.2},minZ:.12,minUp:.45,accent:['hip'],color:0x8a94a8,camDist:2.6,camHeight:.25,
   policyLabel:'MuJoCo Playground go1_policy.onnx (Google DeepMind, Apache-2.0)',modelLabel:'MuJoCo Menagerie unitree_go1 (Unitree, BSD-3)'};
 export const G1_CFG={key:'g1',collideGeoms:['left_foot','right_foot'],shell:{body:'pelvis',type:'capsule',size:'0.13',fromto:'0 0 -0.12 0 0 0.42'},name:'유니트리 G1 휴머노이드',xml:'./robots/g1/g1.xml',assetsDir:'./robots/g1/assets/',policy:'./policies/g1_policy.onnx',
   simDt:.002,ctrlDt:.02,actionScale:.5,keyframe:'knees_bent',rootBody:'pelvis',imuSite:'imu_in_pelvis',linvelSensor:'local_linvel_pelvis',gyroSensor:'gyro_pelvis',obs:'g1',gaitFreq:1.5,
-  cmdScale:{vx:.6,wz:1.0},minZ:.45,minUp:.5,accent:['logo','rubber_hand'],color:0xb9c0cc,camDist:3.4,camHeight:.7,
+  cmdScale:{vx:.6,wz:.5},minZ:.45,minUp:.5,accent:['logo','rubber_hand'],color:0xb9c0cc,camDist:3.4,camHeight:.7,
   policyLabel:'MuJoCo Playground g1_policy.onnx (Google DeepMind, Apache-2.0)',modelLabel:'MuJoCo Menagerie unitree_g1 (Unitree, BSD-3)'};
 
 export const BH_CFG={key:'bh',shell:{body:'torso',type:'capsule',size:'0.1',fromto:'0 0 -0.12 0 0 0.25'},name:'버클리 휴머노이드',xml:'./robots/bh/bh.xml',assetsDir:'./robots/bh/assets/',policy:'./policies/bh_policy.onnx',
