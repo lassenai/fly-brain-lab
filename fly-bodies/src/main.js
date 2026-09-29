@@ -112,7 +112,9 @@ async function runBody(gen){const b=telemetry.body; if(!b)return; let acc=0,prev
     if(telemetry.fallenAt&&now-telemetry.fallenAt>1500){telemetry.fallenAt=0;b.reset();trailPts.length=0;}
     const bn=telemetry.banana; const reach=b.key==='duck'?.18:.35; if(bn&&banana.visible&&Math.hypot(bn.x-st.x,bn.y-st.y)<reach){telemetry.collected++;let p;for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=(b.key==='duck'?.7:1.6)+Math.random()*(b.key==='duck'?.5:1.6);p={x:st.x+d*Math.cos(a),y:st.y+d*Math.sin(a)};if(Math.hypot(p.x,p.y)<7)break;}placeBanana(p.x,p.y);}
     await new Promise(r=>setTimeout(r,4));}}
-switchBody('go1');
+const urlParams = new URLSearchParams(location.search);
+const initialBody = urlParams.get('body') || 'duck';
+switchBody(initialBody);
 // ---- 렌더 + 수치 ----
 $('reset').onclick=()=>{telemetry.body?.reset();trailPts.length=0;worker.postMessage({type:'reset'});telemetry.collected=0;};
 $('clear').onclick=()=>{banana.visible=false;};
