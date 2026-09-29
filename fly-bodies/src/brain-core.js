@@ -73,10 +73,11 @@ export function decode(activity, connected=true) {
   const {left,right,scentLeft,scentRight}=activity;
   if(!connected || ![left,right,scentLeft,scentRight].every(Number.isFinite))return {forward:0,turn:0};
   const odor=scentLeft+scentRight;
-  if(odor<.008||left+right<=0)return {forward:0,turn:0};
-  const contrast=(scentLeft-scentRight)/Math.max(.02,odor);
-  const drive=Math.min(1,(left+right)/.0006)*Math.min(1,(odor-.008)/.04);
-  return {forward:.24*drive*(1-Math.min(.15,Math.abs(contrast)*.5)),turn:.7*Math.tanh(contrast*5)};
+  if(odor<=0||left+right<=0)return {forward:0,turn:0};
+  const contrast=(scentLeft-scentRight)/Math.max(.012,odor);
+  const drive=Math.min(1,(left+right)/.0004)*Math.min(1,(odor-.0001)/.025);
+  const fwdDrive=Math.max(0.72,drive);
+  return {forward:.25*fwdDrive*(1-Math.min(.15,Math.abs(contrast)*.5)),turn:.75*Math.tanh(contrast*5)};
 }
 
 export class NeuralDecoder {

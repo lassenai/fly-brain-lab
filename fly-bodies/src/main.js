@@ -86,7 +86,7 @@ async function switchBody(key,envKey=currentEnv){
 }
 for(const b of document.querySelectorAll('[data-body]'))b.onclick=()=>switchBody(b.dataset.body);
 for(const b of document.querySelectorAll('[data-env]'))b.onclick=()=>switchBody(currentBody,b.dataset.env);
-function maybeStart(){if(telemetry.brainReady&&telemetry.bodyReady&&!telemetry.ready){telemetry.ready=true;$('dot').classList.add('live');worker.postMessage({type:'stimulus',value:stimulus()});worker.postMessage({type:'start'});runBody(generation);} if(telemetry.brainReady&&telemetry.bodyReady)$('loading').hidden=true;}
+function maybeStart(){if(telemetry.brainReady&&telemetry.bodyReady&&!telemetry.ready){telemetry.ready=true;$('dot').classList.add('live');worker.postMessage({type:'stimulus',value:stimulus()});worker.postMessage({type:'start'});runBody(generation);} if(telemetry.brainReady&&telemetry.bodyReady){$('loading').hidden=true;$('loading').style.display='none';}}
 telemetry.brain='fly'; let customBrain=null; const t0=performance.now();
 function pageBrainTick(){if(telemetry.body?.key==='company')return;const st=telemetry.stimulus||{};const inp={smellL:st.olfactory_left||0,smellR:st.olfactory_right||0,touchL:st.mechanosensory_left||0,touchR:st.mechanosensory_right||0,t:(performance.now()-t0)/1000};
   let out={forward:0,turn:0};

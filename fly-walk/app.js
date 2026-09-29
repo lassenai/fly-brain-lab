@@ -29,7 +29,7 @@ function stimulus() {
 // ---- 워커 + 뇌 뷰어 ----
 const worker = new Worker(new URL('./brain-worker.js', import.meta.url), { type: 'module' });
 let brainReady = false, viewReady = false;
-function maybeStart() { if (brainReady && viewReady && !ready) { ready = true; $('loading').hidden = true; $('dot').classList.add('live'); worker.postMessage({ type: 'stimulus', value: stimulus() }); worker.postMessage({ type: 'start' }); } }
+function maybeStart() { if (brainReady && viewReady && !ready) { ready = true; $('loading').hidden = true; $('loading').style.display = 'none'; $('dot').classList.add('live'); worker.postMessage({ type: 'stimulus', value: stimulus() }); worker.postMessage({ type: 'start' }); } }
 worker.onmessage = ({ data: m }) => {
   if (m.type === 'progress') { if (m.label === '뇌 배선') { const pct = m.total ? Math.round(100 * m.got / m.total) : 0; $('prog').value = pct; $('progText').textContent = `뇌 배선 ${(m.got / 1e6).toFixed(1)} / ${(m.total / 1e6).toFixed(1)} MB`; } }
   else if (m.type === 'ready') { brainReady = true; $('statusText').textContent = `작동 중 · 뉴런 ${m.neurons.toLocaleString()} · 운동뉴런 ${m.motor}`; maybeStart(); }
