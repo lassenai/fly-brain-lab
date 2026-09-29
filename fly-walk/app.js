@@ -9,10 +9,10 @@ const state = { x: 0, y: 0, yaw: Math.PI / 2, v: 0, w: 0, legPhase: [0, 0], coll
 const lab = { antenna: 'normal', range: 3.0, light: 0.45 };
 let activity = null, ready = false, cut = false, lastT = performance.now(), brainView = null, autoRotate = true;
 
-// ---- Three.js 3D 무대 구축 ----
+// ---- Three.js 3D 무대 구축 (fly-bodies 라이트 스타일) ----
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#070a14');
-scene.fog = new THREE.Fog('#070a14', 6, 20);
+scene.background = new THREE.Color('#f5f2eb');
+scene.fog = new THREE.Fog('#f5f2eb', 8, 25);
 
 const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 50);
 camera.position.set(0, 1.8, 2.5);
@@ -29,20 +29,20 @@ controls.minDistance = 0.8;
 controls.maxDistance = 8.0;
 
 // 조명
-scene.add(new THREE.HemisphereLight(0xffffff, 0x1e293b, 1.6));
-const sun = new THREE.DirectionalLight(0xfff8eb, 2.0);
-sun.position.set(-2, 5, 3);
+scene.add(new THREE.HemisphereLight(0xffffff, 0xd0cbbd, 1.8));
+const sun = new THREE.DirectionalLight(0xfff8eb, 2.2);
+sun.position.set(-3, 6, 2);
 sun.castShadow = true;
 sun.shadow.mapSize.set(1024, 1024);
 scene.add(sun);
 
-// 바닥 & 그리드
-const floor = new THREE.Mesh(new THREE.CircleGeometry(6, 48), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8, metalness: 0.1 }));
+// 바닥 & 그리드 (fly-bodies 동일 스타일)
+const floor = new THREE.Mesh(new THREE.CircleGeometry(12, 64), new THREE.MeshStandardMaterial({ color: 0xe5e0d4, roughness: 0.9, metalness: 0.05 }));
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-const grid = new THREE.GridHelper(12, 24, 0x334155, 0x1e293b);
+const grid = new THREE.GridHelper(24, 48, 0x9b9588, 0xd0c9bb);
 grid.position.y = 0.002;
 scene.add(grid);
 
