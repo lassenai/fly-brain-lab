@@ -1,4 +1,3 @@
-import './style.css';
 const $=id=>document.getElementById(id);
 const frames=()=>[$('frame-female'),$('frame-male')];
 for(const b of document.querySelectorAll('[data-cmd]'))b.onclick=()=>{for(const f of frames())f.contentWindow?.postMessage({flyduckCmd:b.dataset.cmd},'*');};
