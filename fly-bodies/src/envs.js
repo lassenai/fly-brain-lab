@@ -19,3 +19,23 @@ export function touchStimulus(env,pose,reach){const out={left:0,right:0};if(!env
     for(const g of env.geoms){const dx=Math.max(Math.abs(px-g.pos[0])-g.size[0]-.15,0),dy=Math.max(Math.abs(py-g.pos[1])-g.size[1]-.15,0);best=Math.min(best,Math.hypot(dx,dy));}
     out[key]=Math.max(0,Math.min(1,(.35-best)/.3));}
   return out;}
+
+// 지형(경사/계단/장애물 상자) 위 표면 높이 계산 (바나나가 계단·경사면에 파묻히지 않고 보임)
+export function getTerrainHeight(x,y,envKey){
+  const env=ENVS[envKey]; if(!env||!env.geoms||!env.geoms.length)return 0;
+  let maxH=0;
+  for(const g of env.geoms){
+    if(g.quat&&(g.quat[1]!==0||g.quat[3]!==0)){
+      const dx=x-g.pos[0], dy=y-g.pos[1];
+      if(Math.abs(dx)<=g.size[0]+0.1&&Math.abs(dy)<=g.size[1]+0.1){
+        const rampH=g.pos[2]+g.size[2]+dx*Math.tan(10*Math.PI/180);
+        maxH=Math.max(maxH,rampH);
+      }
+    }else{
+      if(Math.abs(x-g.pos[0])<=g.size[0]+0.05&&Math.abs(y-g.pos[1])<=g.size[1]+0.05){
+        maxH=Math.max(maxH,g.pos[2]+g.size[2]);
+      }
+    }
+  }
+  return maxH;
+}

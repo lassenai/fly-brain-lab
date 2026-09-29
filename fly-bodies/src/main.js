@@ -5,7 +5,7 @@ import {createBrainView} from './brain-view.js';
 import {createMjcfBody,GO1_CFG,G1_CFG,BH_CFG,T1_CFG} from './bodies/mjcf-body.js';
 import {createDuck} from './bodies/duck.js';
 import {createSoccerKitBody} from './bodies/soccer-kit.js';
-import {ENVS,envXml,envMeshes,touchStimulus} from './envs.js';
+import {ENVS,envXml,envMeshes,touchStimulus,getTerrainHeight} from './envs.js';
 import {BRAIN_DEFS,CUSTOM_TEMPLATE,ruleBrain,randomBrain,compileCustom} from './brains.js';
 import {createCompany,COMPANY_ENVS,COMPANY_TEMPLATE,companyRule,companyRandom} from './bodies/company.js';
 const $=id=>document.getElementById(id);
@@ -69,7 +69,12 @@ function updateTrail(x,y){
     }
   }
 }
-function placeBanana(x,y){telemetry.banana={x,y}; banana.position.set(x,0,-y); pulse=1;}
+function placeBanana(x,y){
+  telemetry.banana={x,y};
+  const h=getTerrainHeight(x,y,currentEnv);
+  banana.position.set(x,h,-y);
+  pulse=1;
+}
 let pulse=0; placeBanana(1.2,0.6);
 const ray=new THREE.Raycaster(); let down=null;
 renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};});
