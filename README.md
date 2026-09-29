@@ -50,8 +50,8 @@ env/bin/python scripts/build_male.py
 - 두 뇌 비교는 암수 행동 차이의 증명이 아닙니다.
 
 ## 라이선스
-L@SSEN AI가 쓴 코드는 Apache-2.0입니다(`LICENSE`). 바탕이 된 microfly(Apache-2.0), Pollen Robotics MicroDuck(Apache-2.0), MuJoCo Menagerie 로봇 모델(BSD-3), MuJoCo Playground 정책(Apache-2.0), 뇌 데이터(CC-BY 4.0) 등 제3자 저작물과 라이선스 전문은 `THIRD_PARTY_NOTICES.md`와 `LICENSES/`를 보세요. 이 저장소를 재배포할 때 그 두 가지는 함께 옮겨야 합니다.
+L@SSEN AI가 쓴 코드는 Apache-2.0입니다(`LICENSE`). 이 저장소는 CONNECT AI LAB의 원본 오픈소스 프로젝트를 바탕으로 구현되었으며, 바탕이 된 microfly(Apache-2.0), Pollen Robotics MicroDuck(Apache-2.0), MuJoCo Menagerie 로봇 모델(BSD-3), MuJoCo Playground 정책(Apache-2.0), 뇌 데이터(CC-BY 4.0) 등 제3자 저작물과 라이선스 전문은 `THIRD_PARTY_NOTICES.md`와 `LICENSES/`를 보세요. 이 저장소를 재배포할 때 그 두 가지는 함께 옮겨야 합니다.
 
 ## 만든 사람
-L@SSEN AI
+L@SSEN AI (기반 프로젝트: CONNECT AI LAB)
 
