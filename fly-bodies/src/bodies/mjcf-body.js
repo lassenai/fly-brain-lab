@@ -20,7 +20,7 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
   const adrLin=Number(model.sensor(cfg.linvelSensor).adr), adrGyro=Number(model.sensor(cfg.gyroSensor).adr);
   const nu=model.nu; const defaults=Float32Array.from(Array.from({length:nu},(_,i)=>model.key_qpos[key*model.nq+7+i]));
   const nObs=(cfg.obs==='g1'?16:12)+3*nu; const obs=new Float32Array(nObs), last=new Float32Array(nu);
-  let cmd=[0,0,0], steps=0, policyCalls=0, fallen=false, distance=0, prev=null, phase=[0,Math.PI];
+  let cmd=[0,0,0], steps=0, policyCalls=0, fallen=false, distance=0, prev=null, phase=[0,Math.PI], targetYaw=null;
   const nSub=Math.round(cfg.ctrlDt/cfg.simDt), phaseDt=2*Math.PI*(cfg.gaitFreq||0)*cfg.ctrlDt;
   // three 리그: MuJoCo가 컴파일한 메시(무게중심 정렬 반영)와 지오메트리 배치로 그린다. STL 좌표계가 달라도 물리와 정확히 일치.
   const root=new THREE.Group(); root.rotation.x=-Math.PI/2; scene.add(root);
@@ -38,7 +38,7 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
   onStatus(`${cfg.name}: 부품 ${drawn}개 그림 준비`);
   function pose(){const p=data.xpos,q=data.xquat,i=rootId;const w=q[4*i],x=q[4*i+1],y=q[4*i+2],z=q[4*i+3];return {x:p[3*i],y:p[3*i+1],z:p[3*i+2],yaw:Math.atan2(2*(w*z+x*y),1-2*(y*y+z*z))};}
   function sync(){const p=data.xpos,q=data.xquat;for(const {group,id:i} of bodyGroups){if(i<0)continue;group.position.set(p[3*i],p[3*i+1],p[3*i+2]);group.quaternion.set(q[4*i+1],q[4*i+2],q[4*i+3],q[4*i]);}}
-  function reset(){mj.mj_resetDataKeyframe(model,data,key);mj.mj_forward(model,data);last.fill(0);steps=0;policyCalls=0;fallen=false;distance=0;prev=null;phase=[0,Math.PI];sync();}
+  function reset(){mj.mj_resetDataKeyframe(model,data,key);mj.mj_forward(model,data);last.fill(0);steps=0;policyCalls=0;fallen=false;distance=0;prev=null;phase=[0,Math.PI];targetYaw=null;sync();}
   function buildObs(){const s=data.sensordata,xm=data.site_xmat,qp=data.qpos,qv=data.qvel;let k=0;
     obs[k++]=s[adrLin];obs[k++]=s[adrLin+1];obs[k++]=s[adrLin+2];obs[k++]=s[adrGyro];obs[k++]=s[adrGyro+1];obs[k++]=s[adrGyro+2];
     obs[k++]=-xm[9*imu+6];obs[k++]=-xm[9*imu+7];obs[k++]=-xm[9*imu+8];
@@ -58,8 +58,18 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
     const targetVx=Math.max(0,Math.min(0.6,forward/0.24))*cfg.cmdScale.vx;
     const rawWz=Math.abs(turn)<0.08?0:Math.max(-1,Math.min(1,turn/0.7))*cfg.cmdScale.wz;
     cmd[0]+=0.3*(targetVx-cmd[0]);
-    cmd[2]+=0.4*(rawWz-cmd[2]);
-    if(rawWz===0&&Math.abs(cmd[2])<0.02)cmd[2]=0;
+    const p=pose();
+    if(Math.abs(rawWz)>0.05){
+      targetYaw=null;
+      cmd[2]+=0.4*(rawWz-cmd[2]);
+    } else {
+      if(targetYaw===null)targetYaw=p.yaw;
+      let err=p.yaw-targetYaw;
+      while(err>Math.PI)err-=Math.PI*2;
+      while(err<-Math.PI)err+=Math.PI*2;
+      const corr=-Math.max(-0.6,Math.min(0.6,err*2.5))*cfg.cmdScale.wz;
+      cmd[2]+=0.4*(corr-cmd[2]);
+    }
   }
   function dispose(){scene.remove(root);try{data.delete();model.delete();vfs.delete();}catch(e){}session.release?.().catch?.(()=>{});}
   reset();
