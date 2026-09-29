@@ -7,7 +7,8 @@ function run() {
   const t=performance.now();
   const activity=brain.advance(stimulus,10,{cutSynapses});
   const output=decoder.update(activity);
-  self.postMessage({type:'activity',...activity,...output,generation,elapsed:performance.now()-t},[activity.fireState.buffer]);
+  const fireBuf = activity.fireState.slice().buffer;
+  self.postMessage({type:'activity',...activity,fireState:new Uint8Array(fireBuf),...output,generation,elapsed:performance.now()-t},[fireBuf]);
   timer=setTimeout(run,Math.max(0,100-(performance.now()-t)));
 }
 self.onmessage=async({data:m})=>{

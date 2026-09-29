@@ -33,7 +33,7 @@ renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clie
 new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}).observe(host);
 // ---- 냄새 센서 (microfly 공식) ----
 function stimulus(){const pz=telemetry.body?.pose()||{x:0,y:0,yaw:0};const s={visual_left:.45*.65,visual_right:.45*.65,olfactory_left:0,olfactory_right:0,mechanosensory_left:0,mechanosensory_right:0};
-  const b=banana.visible?telemetry.banana:null;if(b){const dx=b.x-pz.x,dy=b.y-pz.y,bearing=Math.atan2(dy,dx)-pz.yaw;const st=.95*Math.exp(-Math.hypot(dx,dy)/1.6)*(.25+.75*(1+Math.cos(bearing))/2);let l=st*(.5+.5*Math.sin(bearing)),r=st*(.5-.5*Math.sin(bearing));if(telemetry.antenna==='noLeft')l=0;else if(telemetry.antenna==='swap')[l,r]=[r,l];s.olfactory_left=l;s.olfactory_right=r;}
+  const b=banana.visible?telemetry.banana:null;if(b){const dx=b.x-pz.x,dy=b.y-pz.y,bearing=Math.atan2(dy,dx)-pz.yaw;const st=.95*Math.exp(-Math.hypot(dx,dy)/3.0)*(.35+.65*(1+Math.cos(bearing))/2);let l=st*(.5+.5*Math.sin(bearing)),r=st*(.5-.5*Math.sin(bearing));if(telemetry.antenna==='noLeft')l=0;else if(telemetry.antenna==='swap')[l,r]=[r,l];s.olfactory_left=l;s.olfactory_right=r;}
   const t=touchStimulus(ENVS[currentEnv],pz,telemetry.body?.key==='duck'?.18:.35);s.mechanosensory_left=Math.max(s.mechanosensory_left,t.left);s.mechanosensory_right=Math.max(s.mechanosensory_right,t.right);
   telemetry.stimulus=s;return s;}
 // ---- 뇌 워커 ----
@@ -110,7 +110,7 @@ async function runBody(gen){const b=telemetry.body; if(!b)return; let acc=0,prev
     if(!paused){let n=0;while(acc>=b.ctrlDt&&n<4){await b.controlStep();acc-=b.ctrlDt;n++;} if(n===4)acc=0;} else acc=0;
     const st=b.state(); if(b.key==='company'){await new Promise(r=>setTimeout(r,4));continue;} if(st.fallen&&!telemetry.fallenAt)telemetry.fallenAt=now; if(!st.fallen)telemetry.fallenAt=0;
     if(telemetry.fallenAt&&now-telemetry.fallenAt>1500){telemetry.fallenAt=0;b.reset();trailPts.length=0;}
-    const bn=telemetry.banana; const reach=b.key==='duck'?.18:.35; if(bn&&banana.visible&&Math.hypot(bn.x-st.x,bn.y-st.y)<reach){telemetry.collected++;let p;for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=(b.key==='duck'?.7:1.6)+Math.random()*(b.key==='duck'?.5:1.6);p={x:st.x+d*Math.cos(a),y:st.y+d*Math.sin(a)};if(Math.hypot(p.x,p.y)<7)break;}placeBanana(p.x,p.y);}
+    const bn=telemetry.banana; const reach=b.key==='duck'?.18:.35; if(bn&&banana.visible&&Math.hypot(bn.x-st.x,bn.y-st.y)<reach){telemetry.collected++;let p;for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=(b.key==='duck'?.6:1.0)+Math.random()*(b.key==='duck'?.4:.8);p={x:st.x+d*Math.cos(a),y:st.y+d*Math.sin(a)};if(Math.hypot(p.x,p.y)<7)break;}placeBanana(p.x,p.y);}
     await new Promise(r=>setTimeout(r,4));}}
 const urlParams = new URLSearchParams(location.search);
 const initialBody = urlParams.get('body') || 'duck';

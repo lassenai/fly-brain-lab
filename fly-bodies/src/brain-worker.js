@@ -14,7 +14,8 @@ function loop() {
   const a = brain.advance(stimulus, 10, {cutSynapses: cut});
   const d = decoder.update(a);
   const side = rates(brain, a.fireState, 10, ['motor_left', 'motor_right', 'olfactory_left', 'olfactory_right']);
-  self.postMessage({type: 'activity', left: a.left, right: a.right, scentLeft: a.scentLeft, scentRight: a.scentRight, motor: a.motor, motorLeft: side.motor_left || 0, motorRight: side.motor_right || 0, olfL: side.olfactory_left || 0, olfR: side.olfactory_right || 0, spikes: a.spikes, tick: a.tick, command: d.command, fireState: a.fireState}, [a.fireState.buffer]);
+  const fireBuf = a.fireState.slice().buffer;
+  self.postMessage({type: 'activity', left: a.left, right: a.right, scentLeft: a.scentLeft, scentRight: a.scentRight, motor: a.motor, motorLeft: side.motor_left || 0, motorRight: side.motor_right || 0, olfL: side.olfactory_left || 0, olfR: side.olfactory_right || 0, spikes: a.spikes, tick: a.tick, command: d.command, fireState: new Uint8Array(fireBuf)}, [fireBuf]);
   timer = setTimeout(loop, Math.max(0, 100 - (performance.now() - t)));
 }
 self.onmessage = async ({data: m}) => {
