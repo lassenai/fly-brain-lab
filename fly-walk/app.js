@@ -164,7 +164,7 @@ function createFruitFly3DMesh() {
   }
 
   scene.add(flyGroup);
-  flyGroup.scale.set(0.28, 0.28, 0.28);
+  flyGroup.scale.set(0.12, 0.12, 0.12);
   return { root: flyGroup, wingL, wingR, antTipL, antTipR, antMatL, antMatR, legs };
 }
 
@@ -364,7 +364,7 @@ function step(dt) {
   }
 
   // 3D 카메라 부드러운 추적
-  const camTarget = new THREE.Vector3(state.x, 0.06, -state.y);
+  const camTarget = new THREE.Vector3(state.x, 0.025, -state.y);
   controls.target.lerp(camTarget, 0.08);
 }
 
