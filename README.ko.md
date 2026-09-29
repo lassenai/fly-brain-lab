@@ -27,7 +27,7 @@
 ```
 fly_brain_lab/
 ├── index.html               # GitHub Pages 메인 접속 랜딩 및 시뮬레이터 런처
-├── fly-walk/                # 2D 초파리 + 3D 뇌 실시간 시뮬레이터 (정적 HTML/JS)
+├── fly-walk/                # 3D 초파리 + 3D 뇌 실시간 시뮬레이터 (정적 HTML/JS)
 ├── fly-bodies/              # 한 뇌, 여러 몸 3D 물리 시뮬레이터 (Vite / MuJoCo WebGL)
 │   └── dist/                # 웹 실행용 정적 빌드 결과물
 ├── fly-duck/                # 마이크로덕 실험실 & 두 뇌 비교 (compare.html)

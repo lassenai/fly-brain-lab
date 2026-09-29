@@ -28,11 +28,10 @@ Run the simulators instantly in any modern web browser without installing additi
 ```
 fly_brain_lab/
 ├── index.html               # Main landing page & simulator portal
-├── fly-walk/                # 2D Fruit fly + 3D real-time brain simulator (Pure HTML/JS)
+├── fly-walk/                # 3D Fruit fly + 3D real-time brain simulator (Pure HTML/JS)
 ├── fly-bodies/              # Multi-body 3D physics simulator (Vite / MuJoCo WebGL)
 │   └── dist/                # Pre-built static distribution for web
 ├── fly-duck/                # MicroDuck lab & connectome comparison (compare.html)
-├── flybody/                 # Fruit fly 3D mesh assets & collision models
 ├── scripts/
 │   └── build_male.py        # MaleCNS connectome parser (feather → 12MB binary graph)
 ├── THIRD_PARTY_NOTICES.md   # Third-party notices & license disclosures
