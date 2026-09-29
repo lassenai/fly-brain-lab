@@ -1,12 +1,12 @@
-# 초파리 뇌로 로봇을 조종하기 — CONNECT AI LAB 오픈소스
+# 초파리 뇌로 로봇을 조종하기 — L@SSEN AI 오픈소스
 
 2026년 9월 공개된 수컷 초파리 뇌 배선(MaleCNS, 뉴런 166,700개)을 브라우저에서 물통(LIF) 모델로 돌리고, 그 출력으로 로봇 개·오리·휴머노이드·2D 초파리를 움직이는 실험실입니다. 전부 여러분 기기 안에서 돌아가고, 서버도 계정도 없습니다. **이 뇌는 학습하지 않습니다.** 걸음은 각 로봇이 강화학습으로 배운 공개 정책이 만들고, 초파리 뇌는 방향만 정합니다.
 
 | 폴더 | 무엇 | 바로 보기 |
 |---|---|---|
-| `fly-bodies/` | 한 뇌, 여러 몸 — 유니트리 Go1 로봇 개 · 마이크로덕 · 유니트리 G1 휴머노이드 (브라우저 MuJoCo + ONNX 정책) | https://wonseokjayjung-fly-bodies.static.hf.space/ |
-| `fly-walk/` | 초파리 뇌 걷기 — 2D 초파리 + 실시간 발화 3D 뇌 (물리 없음, 가벼움) | https://wonseokjayjung-fly-walk.static.hf.space/ |
-| `fly-duck/` | 마이크로덕 실험실 — 더듬이·절제·시냅스 실험, 두 뇌(2024 암컷 vs 2026 수컷) 비교 | https://wonseokjayjung-fly-duck.static.hf.space/ |
+| `fly-bodies/` | 한 뇌, 여러 몸 — 유니트리 Go1 로봇 개 · 마이크로덕 · 유니트리 G1 휴머노이드 (브라우저 MuJoCo + ONNX 정책) | https://lassenai.github.io/fly-brain-lab/fly-bodies/dist/ |
+| `fly-walk/` | 초파리 뇌 걷기 — 2D 초파리 + 실시간 발화 3D 뇌 (물리 없음, 가벼움) | https://lassenai.github.io/fly-brain-lab/fly-walk/ |
+| `fly-duck/` | 마이크로덕 실험실 — 더듬이·절제·시냅스 실험, 두 뇌(2024 암컷 vs 2026 수컷) 비교 | https://lassenai.github.io/fly-brain-lab/fly-duck/compare.html |
 | `notebook/` | 코랩 실습 노트북 — 뇌 지도 표 열기 → 뇌 그리기 → 냄새 경로 3단계 → 물통 모델 → 이득 실험 | 코랩에서 열기 |
 | `scripts/build_male.py` | MaleCNS 원본 표 3개 → 브라우저용 12MB 그래프 변환 (42초) | |
 | `docs/` | 논문 설명, 실습 사다리, 강의 논리 구조 (한국어) | |
@@ -50,8 +50,8 @@ env/bin/python scripts/build_male.py
 - 두 뇌 비교는 암수 행동 차이의 증명이 아닙니다.
 
 ## 라이선스
-CONNECT AI LAB이 쓴 코드는 Apache-2.0입니다(`LICENSE`). 바탕이 된 microfly(Apache-2.0), Pollen Robotics MicroDuck(Apache-2.0), MuJoCo Menagerie 로봇 모델(BSD-3), MuJoCo Playground 정책(Apache-2.0), 뇌 데이터(CC-BY 4.0) 등 제3자 저작물과 라이선스 전문은 `THIRD_PARTY_NOTICES.md`와 `LICENSES/`를 보세요. 이 저장소를 재배포할 때 그 두 가지는 함께 옮겨야 합니다.
+L@SSEN AI가 쓴 코드는 Apache-2.0입니다(`LICENSE`). 바탕이 된 microfly(Apache-2.0), Pollen Robotics MicroDuck(Apache-2.0), MuJoCo Menagerie 로봇 모델(BSD-3), MuJoCo Playground 정책(Apache-2.0), 뇌 데이터(CC-BY 4.0) 등 제3자 저작물과 라이선스 전문은 `THIRD_PARTY_NOTICES.md`와 `LICENSES/`를 보세요. 이 저장소를 재배포할 때 그 두 가지는 함께 옮겨야 합니다.
 
 ## 만든 사람
-AI 멘토 제이 · CONNECT AI LAB — https://www.youtube.com/@CONNECT-AI-LAB · 무료 지식 아카이브 https://www.aicitybuilders.com/guide
-AI가 만드는 기회를 소수가 독점하지 않도록.
+L@SSEN AI
+
