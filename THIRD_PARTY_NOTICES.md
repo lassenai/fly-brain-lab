@@ -1,6 +1,6 @@
 # 제3자 저작물 고지 (Third-party notices)
 
-이 저장소의 CONNECT AI LAB 코드는 Apache-2.0입니다(`LICENSE`). 아래 저작물을 포함하거나 바탕으로 했으며, 각 라이선스 전문은 `LICENSES/`에 있습니다.
+이 저장소의 L@SSEN AI 코드는 Apache-2.0입니다(`LICENSE`). 아래 저작물을 포함하거나 바탕으로 했으며, 각 라이선스 전문은 `LICENSES/`에 있습니다.
 
 | 저작물 | 어디에 | 라이선스 | 출처 |
 |---|---|---|---|
