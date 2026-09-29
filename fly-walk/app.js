@@ -76,87 +76,184 @@ ring.rotation.x = -Math.PI / 2;
 ring.position.y = 0.002;
 scene.add(ring);
 
-// ---- 3D 초파리 로봇 메쉬 생성 ----
+// ---- DeepMind MuJoCo flybody 해부학 3D 초파리(Drosophila melanogaster) 메쉬 생성 ----
 function create3DFly() {
   const flyGroup = new THREE.Group();
 
-  // 1. 배 (Abdomen)
-  const abdGeo = new THREE.SphereGeometry(0.18, 16, 16);
-  abdGeo.scale(1, 0.8, 1.45);
-  const abdMat = new THREE.MeshStandardMaterial({ color: 0x3a2d1d, roughness: 0.5 });
-  const abd = new THREE.Mesh(abdGeo, abdMat);
-  abd.position.set(0, 0.15, -0.22);
-  abd.castShadow = true;
-  flyGroup.add(abd);
+  // 1. 머리 캡슐 (Head Capsule & Proboscis)
+  const headGroup = new THREE.Group();
+  const headGeo = new THREE.SphereGeometry(0.105, 20, 20);
+  headGeo.scale(1.1, 0.9, 1.0);
+  const headMat = new THREE.MeshStandardMaterial({ color: 0x6e5233, roughness: 0.45, metalness: 0.15 });
+  const headMesh = new THREE.Mesh(headGeo, headMat);
+  headMesh.castShadow = true;
+  headGroup.add(headMesh);
 
-  // 2. 가슴 (Thorax)
-  const thxGeo = new THREE.SphereGeometry(0.14, 16, 16);
-  thxGeo.scale(1, 0.85, 1.1);
-  const thxMat = new THREE.MeshStandardMaterial({ color: 0x5c4932, roughness: 0.35, metalness: 0.25 });
-  const thx = new THREE.Mesh(thxGeo, thxMat);
-  thx.position.set(0, 0.16, 0);
-  thx.castShadow = true;
-  flyGroup.add(thx);
+  // 주둥이 (Proboscis / Rostrum)
+  const probGeo = new THREE.CylinderGeometry(0.015, 0.025, 0.09, 12);
+  const probMat = new THREE.MeshStandardMaterial({ color: 0x4a341e, roughness: 0.6 });
+  const prob = new THREE.Mesh(probGeo, probMat);
+  prob.position.set(0, -0.07, 0.08);
+  prob.rotation.x = Math.PI / 6;
+  headGroup.add(prob);
 
-  // 3. 머리 (Head)
-  const headGeo = new THREE.SphereGeometry(0.1, 16, 16);
-  const headMat = new THREE.MeshStandardMaterial({ color: 0x4c3c28, roughness: 0.4 });
-  const head = new THREE.Mesh(headGeo, headMat);
-  head.position.set(0, 0.16, 0.18);
-  head.castShadow = true;
-  flyGroup.add(head);
-
-  // 4. 붉은 복안 (Compound Eyes)
-  for (const side of [-1, 1]) {
-    const eyeGeo = new THREE.SphereGeometry(0.048, 12, 12);
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0xd92618, roughness: 0.2, emissive: 0x550000 });
-    const eye = new THREE.Mesh(eyeGeo, eyeMat);
-    eye.position.set(side * 0.072, 0.18, 0.22);
-    flyGroup.add(eye);
+  // 정수리 단안 3개 (Ocelli)
+  const ocelliMat = new THREE.MeshBasicMaterial({ color: 0xff3322 });
+  for (const pos of [[0, 0.088, 0.02], [-0.018, 0.078, 0.01], [0.018, 0.078, 0.01]]) {
+    const ocellus = new THREE.Mesh(new THREE.SphereGeometry(0.01, 8, 8), ocelliMat);
+    ocellus.position.set(...pos);
+    headGroup.add(ocellus);
   }
 
-  // 5. 빛나는 더듬이 (Antennae Glow)
+  // 측면 붉은 복안 2개 (Compound Eyes - Drosophila Crimson Red)
+  for (const side of [-1, 1]) {
+    const eyeGeo = new THREE.SphereGeometry(0.052, 16, 16);
+    eyeGeo.scale(0.85, 1.05, 1.15);
+    const eyeMat = new THREE.MeshStandardMaterial({ color: 0xcc1a0c, roughness: 0.18, metalness: 0.3, emissive: 0x440500 });
+    const eye = new THREE.Mesh(eyeGeo, eyeMat);
+    eye.position.set(side * 0.078, 0.01, 0.03);
+    eye.rotation.y = side * 0.25;
+    headGroup.add(eye);
+  }
+
+  // 깃털 더듬이 2개 (Antennae & Arista with Olfactory Glow)
   const antMats = [];
   for (const side of [-1, 1]) {
-    const antGeo = new THREE.CylinderGeometry(0.006, 0.014, 0.14, 8);
-    const antMat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 0.3 });
-    const ant = new THREE.Mesh(antGeo, antMat);
-    ant.position.set(side * 0.035, 0.23, 0.27);
-    ant.rotation.x = Math.PI / 4;
-    ant.rotation.z = -side * Math.PI / 6;
-    flyGroup.add(ant);
+    const antGroup = new THREE.Group();
+    // 더듬이 마디 (Funicle)
+    const baseGeo = new THREE.CylinderGeometry(0.006, 0.012, 0.06, 8);
+    const antMat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 0.35 });
+    const base = new THREE.Mesh(baseGeo, antMat);
+    base.rotation.x = Math.PI / 4;
+    antGroup.add(base);
+
+    // 깃털 깃대 (Arista)
+    const aristaGeo = new THREE.ConeGeometry(0.004, 0.1, 6);
+    const aristaMat = new THREE.MeshBasicMaterial({ color: 0xffe57f });
+    const arista = new THREE.Mesh(aristaGeo, aristaMat);
+    arista.position.set(side * 0.01, 0.05, 0.04);
+    arista.rotation.z = -side * Math.PI / 5;
+    antGroup.add(arista);
+
+    antGroup.position.set(side * 0.032, 0.04, 0.095);
+    headGroup.add(antGroup);
     antMats.push(antMat);
   }
 
-  // 6. 무지개빛 반투명 날개 (Wings)
-  const wings = [];
+  headGroup.position.set(0, 0.165, 0.18);
+  flyGroup.add(headGroup);
+
+  // 2. 가슴 (Thorax & Scutellum)
+  const thxGroup = new THREE.Group();
+  const thxGeo = new THREE.SphereGeometry(0.145, 20, 20);
+  thxGeo.scale(1.0, 0.9, 1.2);
+  const thxMat = new THREE.MeshStandardMaterial({ color: 0x7a5c38, roughness: 0.35, metalness: 0.2 });
+  const thx = new THREE.Mesh(thxGeo, thxMat);
+  thx.castShadow = true;
+  thxGroup.add(thx);
+
+  // 소배판 (Scutellum)
+  const scutGeo = new THREE.ConeGeometry(0.06, 0.08, 3);
+  scutGeo.rotateX(-Math.PI / 2);
+  const scutMat = new THREE.MeshStandardMaterial({ color: 0x5a4225, roughness: 0.4 });
+  const scut = new THREE.Mesh(scutGeo, scutMat);
+  scut.position.set(0, 0.06, -0.14);
+  thxGroup.add(scut);
+
+  // 평형곤 2개 (Halteres - Hindwing Sensors)
   for (const side of [-1, 1]) {
-    const wingGeo = new THREE.PlaneGeometry(0.18, 0.45);
-    const wingMat = new THREE.MeshStandardMaterial({ color: 0xd9e8ff, transparent: true, opacity: 0.5, roughness: 0.1, side: THREE.DoubleSide });
-    const wing = new THREE.Mesh(wingGeo, wingMat);
-    wing.position.set(side * 0.11, 0.25, -0.08);
-    wing.rotation.x = Math.PI / 2;
-    wing.rotation.y = side * 0.25;
-    flyGroup.add(wing);
-    wings.push(wing);
+    const haltGroup = new THREE.Group();
+    const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.06), new THREE.MeshBasicMaterial({ color: 0xddccaa }));
+    stalk.rotation.z = side * Math.PI / 3;
+    haltGroup.add(stalk);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
+    knob.position.set(side * 0.03, 0.02, 0);
+    haltGroup.add(knob);
+    haltGroup.position.set(side * 0.09, 0.02, -0.11);
+    thxGroup.add(haltGroup);
   }
 
-  // 7. 3D 관절 다리 6개 (6 Legs)
+  thxGroup.position.set(0, 0.17, 0);
+  flyGroup.add(thxGroup);
+
+  // 3. 배 6개 마디 (Abdomen - 6 Segmented Tergites)
+  const abdGroup = new THREE.Group();
+  const segNum = 6;
+  for (let i = 0; i < segNum; i++) {
+    const radius = 0.17 * Math.sin(Math.PI * (i + 1) / (segNum + 1.2));
+    const segGeo = new THREE.CylinderGeometry(radius, radius * 0.9, 0.06, 16);
+    segGeo.rotateX(Math.PI / 2);
+    // Drosophila melanogaster 특유의 마디 스트라이프 띠
+    const isBand = i % 2 === 1;
+    const segMat = new THREE.MeshStandardMaterial({ color: isBand ? 0x241a10 : 0x8c6b45, roughness: 0.5 });
+    const seg = new THREE.Mesh(segGeo, segMat);
+    seg.position.set(0, 0, -i * 0.052);
+    seg.castShadow = true;
+    abdGroup.add(seg);
+  }
+  abdGroup.position.set(0, 0.155, -0.12);
+  flyGroup.add(abdGroup);
+
+  // 4. 시맥이 표현된 영롱한 무지개빛 날개 (Wings with Venation)
+  const wings = [];
+  for (const side of [-1, 1]) {
+    const wingGroup = new THREE.Group();
+    // 날개 막 (Wing Membrane)
+    const wingGeo = new THREE.PlaneGeometry(0.19, 0.48);
+    const wingMat = new THREE.MeshStandardMaterial({ color: 0xe0edff, transparent: true, opacity: 0.55, roughness: 0.08, side: THREE.DoubleSide });
+    const wingMembrane = new THREE.Mesh(wingGeo, wingMat);
+    wingMembrane.position.set(0, 0, -0.22);
+    wingGroup.add(wingMembrane);
+
+    // 날개 시맥 (Veins L1~L5 Lines)
+    const veinMat = new THREE.LineBasicMaterial({ color: 0x8899bb, transparent: true, opacity: 0.65 });
+    const veinPts = [
+      new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -0.45),
+      new THREE.Vector3(0, 0, 0), new THREE.Vector3(side * 0.06, 0, -0.42),
+      new THREE.Vector3(0, 0, -0.15), new THREE.Vector3(side * 0.08, 0, -0.38),
+      new THREE.Vector3(0, 0, -0.25), new THREE.Vector3(side * 0.04, 0, -0.44)
+    ];
+    const veinGeo = new THREE.BufferGeometry().setFromPoints(veinPts);
+    const veins = new THREE.LineSegments(veinGeo, veinMat);
+    wingGroup.add(veins);
+
+    wingGroup.position.set(side * 0.09, 0.25, -0.04);
+    wingGroup.rotation.x = Math.PI / 2;
+    wingGroup.rotation.y = side * 0.22;
+    flyGroup.add(wingGroup);
+    wings.push(wingGroup);
+  }
+
+  // 5. 정교한 4마디 3D 다리 6개 (6 Legs: Coxa, Femur, Tibia, Tarsus)
   const legs = [];
   for (let i = 0; i < 3; i++) {
     for (const side of [-1, 1]) {
       const legGroup = new THREE.Group();
-      const legMat = new THREE.MeshStandardMaterial({ color: 0x2d2317, roughness: 0.6 });
+      const legMat = new THREE.MeshStandardMaterial({ color: 0x3d2f20, roughness: 0.55 });
 
-      const femur = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.008, 0.15), legMat);
-      femur.position.set(side * 0.06, -0.04, 0);
+      // 기절 (Coxa)
+      const coxa = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.01, 0.07), legMat);
+      coxa.position.set(side * 0.03, -0.02, 0);
+      coxa.rotation.z = -side * Math.PI / 4;
+      legGroup.add(coxa);
+
+      // 퇴절 (Femur)
+      const femur = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.008, 0.16), legMat);
+      femur.position.set(side * 0.08, -0.06, 0);
       femur.rotation.z = -side * Math.PI / 3;
       legGroup.add(femur);
 
-      const tibia = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.005, 0.17), legMat);
-      tibia.position.set(side * 0.12, -0.12, 0);
-      tibia.rotation.z = side * Math.PI / 6;
+      // 경절 (Tibia)
+      const tibia = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.005, 0.18), legMat);
+      tibia.position.set(side * 0.15, -0.14, 0);
+      tibia.rotation.z = side * Math.PI / 5;
       legGroup.add(tibia);
+
+      // 부절 (Tarsus 5-segment)
+      const tarsus = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.002, 0.10), legMat);
+      tarsus.position.set(side * 0.18, -0.22, 0);
+      tarsus.rotation.z = side * Math.PI / 10;
+      legGroup.add(tarsus);
 
       const zOffset = (i - 1) * 0.13;
       legGroup.position.set(0, 0.14, zOffset);
