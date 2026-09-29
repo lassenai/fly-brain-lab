@@ -1,9 +1,10 @@
 # 제3자 저작물 고지 (Third-party notices)
 
-이 저장소의 L@SSEN AI 코드는 Apache-2.0입니다(`LICENSE`). 아래 저작물을 포함하거나 바탕으로 했으며, 각 라이선스 전문은 `LICENSES/`에 있습니다.
+이 저장소의 L@SSEN AI 코드는 Apache-2.0입니다(`LICENSE`). CONNECT AI LAB의 원본 오픈소스 저작물 및 아래 제3자 저작물을 포함하거나 바탕으로 했으며, 각 라이선스 전문은 `LICENSES/`에 있습니다.
 
 | 저작물 | 어디에 | 라이선스 | 출처 |
 |---|---|---|---|
+| CONNECT AI LAB (AI 멘토 제이) — 수컷 뇌 변환(MaleCNS), 한국어 가상 신경과학 실험실 설계, 두 뇌 비교 실험실, 다중 로봇 웹 환경 | 전체 저장소 구조, fly-walk / fly-duck / fly-bodies 원본 한국어 인터페이스 및 실험실 기능 | Apache-2.0 | https://www.youtube.com/@CONNECT-AI-LAB |
 | microfly (Leandro von Werra) — 물통(LIF) 모델, 번역식(디코더), 뇌 3D 뷰어, 마이크로덕 걷기 루프 | fly-duck 전체 바탕, fly-walk·fly-bodies의 brain-core.js·brain-view.js·duck-sim.js | Apache-2.0 | https://huggingface.co/spaces/lvwerra/microfly |
 | MicroDuck simulator (Pollen Robotics) — 로봇 모델, 메시, 걷기 정책 BEST_alpha_walking.onnx, 리그 코드 | fly-duck/public/robot, fly-bodies/public/robots/duck, src/vendor/duck.js | Apache-2.0 | https://huggingface.co/spaces/pollen-robotics/microduck-simulator |
 | MuJoCo Menagerie unitree_go1, unitree_g1 (Unitree Robotics) — 로봇 모델·메시 | fly-bodies/public/robots/go1, g1 | BSD-3-Clause | https://github.com/google-deepmind/mujoco_menagerie |
