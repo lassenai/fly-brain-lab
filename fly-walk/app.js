@@ -29,7 +29,7 @@ function stimulus() {
 // ---- 워커 + 뇌 뷰어 ----
 const worker = new Worker(new URL('./brain-worker.js', import.meta.url), { type: 'module' });
 let brainReady = false, viewReady = false;
-function maybeStart() { if (brainReady && viewReady && !ready) { ready = true; $('loading').hidden = true; $('dot').classList.add('live'); worker.postMessage({ type: 'stimulus', value: stimulus() }); worker.postMessage({ type: 'start' }); } }
+function maybeStart() { if (brainReady && viewReady && !ready) { ready = true; $('loading').hidden = true; $('loading').style.display = 'none'; $('dot').classList.add('live'); worker.postMessage({ type: 'stimulus', value: stimulus() }); worker.postMessage({ type: 'start' }); } }
 worker.onmessage = ({ data: m }) => {
   if (m.type === 'progress') { if (m.label === '뇌 배선') { const pct = m.total ? Math.round(100 * m.got / m.total) : 0; $('prog').value = pct; $('progText').textContent = `뇌 배선 ${(m.got / 1e6).toFixed(1)} / ${(m.total / 1e6).toFixed(1)} MB`; } }
   else if (m.type === 'ready') { brainReady = true; $('statusText').textContent = `작동 중 · 뉴런 ${m.neurons.toLocaleString()} · 운동뉴런 ${m.motor}`; maybeStart(); }
@@ -130,15 +130,28 @@ function draw() {
   // 발자국
   for (const f of state.steps) { const age = (now - f.t) / 9000; if (age > 1) continue; ctx.fillStyle = `rgba(255,214,10,${.55 * (1 - age)})`; ctx.beginPath(); ctx.arc(px(f.x), py(f.y), 2.2, 0, Math.PI * 2); ctx.fill(); }
   drawFly(state.x, state.y, state.yaw, s);
-  // 수치 + 신호 흐름 막대
-  const a = activity || {}; const pct = v => (100 * (v || 0)).toFixed(v > .001 ? 1 : 2), lvl = (id, v) => $(id).style.setProperty('--lvl', Math.max(0, Math.min(1, v)));
-  $('fInL').textContent = s.olfactory_left.toFixed(2); $('fInR').textContent = s.olfactory_right.toFixed(2); lvl('n0', Math.max(s.olfactory_left, s.olfactory_right));
-  $('fOL').textContent = pct(a.olfL); $('fOR').textContent = pct(a.olfR); lvl('n1', Math.max(a.olfL || 0, a.olfR || 0) * 2.5);
-  $('fAL').textContent = pct(a.scentLeft); $('fAR').textContent = pct(a.scentRight); lvl('n2', Math.max(a.scentLeft || 0, a.scentRight || 0) * 6);
-  const dn = ((a.left || 0) + (a.right || 0)) / 2; $('fDN').textContent = (100 * dn).toFixed(2); lvl('n3', dn * 120);
-  $('fML').textContent = (100 * (a.motorLeft || 0)).toFixed(2); $('fMR').textContent = (100 * (a.motorRight || 0)).toFixed(2); lvl('n4', Math.max(a.motorLeft || 0, a.motorRight || 0) * 400);
-  $('fFwd').textContent = (a.command?.forward || 0).toFixed(2); $('fTurn').textContent = (a.command?.turn || 0).toFixed(2) + ' rad/s'; $('fSpk').textContent = (a.spikes || 0).toLocaleString(); lvl('n5', (a.command?.forward || 0) / .24);
-  $('count').textContent = state.collected ? `🍌 ${state.collected}` : '';
+  // 수치 + 신호 흐름 막대 (안전 참조)
+  const a = activity || {}; const pct = v => (100 * (v || 0)).toFixed(v > .001 ? 1 : 2), lvl = (id, v) => $(id)?.style?.setProperty('--lvl', Math.max(0, Math.min(1, v)));
+  if ($('fInL')) $('fInL').textContent = s.olfactory_left.toFixed(2);
+  if ($('fInR')) $('fInR').textContent = s.olfactory_right.toFixed(2);
+  lvl('n0', Math.max(s.olfactory_left, s.olfactory_right));
+  if ($('fOL')) $('fOL').textContent = pct(a.olfL);
+  if ($('fOR')) $('fOR').textContent = pct(a.olfR);
+  lvl('n1', Math.max(a.olfL || 0, a.olfR || 0) * 2.5);
+  if ($('fAL')) $('fAL').textContent = pct(a.scentLeft);
+  if ($('fAR')) $('fAR').textContent = pct(a.scentRight);
+  lvl('n2', Math.max(a.scentLeft || 0, a.scentRight || 0) * 6);
+  const dn = ((a.left || 0) + (a.right || 0)) / 2;
+  if ($('fDN')) $('fDN').textContent = (100 * dn).toFixed(2);
+  lvl('n3', dn * 120);
+  if ($('fML')) $('fML').textContent = (100 * (a.motorLeft || 0)).toFixed(2);
+  if ($('fMR')) $('fMR').textContent = (100 * (a.motorRight || 0)).toFixed(2);
+  lvl('n4', Math.max(a.motorLeft || 0, a.motorRight || 0) * 400);
+  if ($('fFwd')) $('fFwd').textContent = (a.command?.forward || 0).toFixed(2);
+  if ($('fTurn')) $('fTurn').textContent = (a.command?.turn || 0).toFixed(2) + ' rad/s';
+  if ($('fSpk')) $('fSpk').textContent = (a.spikes || 0).toLocaleString();
+  lvl('n5', (a.command?.forward || 0) / .24);
+  if ($('count')) $('count').textContent = state.collected ? `🍌 ${state.collected}` : '';
   if (brainView) brainView.render();
   window.flywalk = { ready, state, activity, stimulus: s, lab, cut, brain: brainView?.state?.() };
   requestAnimationFrame(draw);
