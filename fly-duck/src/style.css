@@ -29,9 +29,9 @@ footer button:hover{background:transparent;color:#303a34}
 
 #stimulus-label:empty{display:none}
 
-/* ===== L@SSEN AI theme (dark · olive green · Pretendard) ===== */
-:root{--bg:#070a12;--surface:#0f172a;--surface2:#1e293b;--line:rgba(255,255,255,0.1);--text:#f8fafc;--muted:#94a3b8;--accent:#8b9a47;--accent-ink:#1e240c;font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:var(--text);background:var(--bg)}
-body{background-color:var(--bg);background-image:radial-gradient(circle at 15% 20%, rgba(139, 154, 71, 0.18) 0%, transparent 40%),radial-gradient(circle at 85% 80%, rgba(107, 142, 35, 0.15) 0%, transparent 40%);background-attachment:fixed;}
+/* ===== L@SSEN AI Silver theme (Silver · Olive · Pretendard) ===== */
+:root{--bg:#e2e8f0;--surface:#ffffff;--surface2:#f1f5f9;--line:#cbd5e1;--text:#0f172a;--muted:#475569;--accent:#708238;--accent-ink:#ffffff;font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:var(--text);background:var(--bg)}
+body{background-color:#e2e8f0;background-image:radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.9) 0%, transparent 45%),radial-gradient(circle at 85% 80%, rgba(203, 213, 225, 0.8) 0%, transparent 45%),linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);background-attachment:fixed;color:var(--text)}
 button{border-color:var(--line);color:var(--text)}button:hover{background:var(--surface2)}
 button:focus-visible,a:focus-visible,input:focus-visible{outline-color:var(--accent)}
 header.brand{margin:0 4vw;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}
