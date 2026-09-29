@@ -43,8 +43,10 @@ const tipCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(.048,.042,0),new TH
 const tipMesh=new THREE.Mesh(new THREE.TubeGeometry(tipCurve,6,.010,5,false),tipMat);
 banana.add(tipMesh);
 // 바나나 노란색 광륜 (Glow)
-const glow=new THREE.Mesh(new THREE.CircleGeometry(.3,32),new THREE.MeshBasicMaterial({color:0xffd60a,transparent:true,opacity:.25,depthWrite:false}));
-glow.rotation.x=-Math.PI/2; glow.position.y=.004; banana.add(glow); scene.add(banana);
+const glow=new THREE.Mesh(new THREE.CircleGeometry(.55,32),new THREE.MeshBasicMaterial({color:0xffd60a,transparent:true,opacity:.28,depthWrite:false}));
+glow.rotation.x=-Math.PI/2; glow.position.y=.004; banana.add(glow); 
+banana.scale.set(1.8,1.8,1.8);
+scene.add(banana);
 
 // 검은색 선명한 로봇 이동 궤적 점선 (Black Dashed Trail Line)
 const trail=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineDashedMaterial({color:0x000000,dashSize:0.06,gapSize:0.04,transparent:true,opacity:.85}));
@@ -82,7 +84,7 @@ renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clie
 new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}).observe(host);
 // ---- 냄새 센서 (microfly 공식) ----
 function stimulus(){const pz=telemetry.body?.pose()||{x:0,y:0,yaw:0};const s={visual_left:.45*.65,visual_right:.45*.65,olfactory_left:0,olfactory_right:0,mechanosensory_left:0,mechanosensory_right:0};
-  const b=banana.visible?telemetry.banana:null;if(b){const dx=b.x-pz.x,dy=b.y-pz.y,dist=Math.hypot(dx,dy),bearing=Math.atan2(dy,dx)-pz.yaw;const st=.95*Math.exp(-dist/3.0)*(.35+.65*(1+Math.cos(bearing))/2);const turnDamp=dist<.7?Math.max(.2,dist/.7):1.0;const sinB=Math.sin(bearing)*turnDamp;let l=st*(.5+.5*sinB),r=st*(.5-.5*sinB);if(telemetry.antenna==='noLeft')l=0;else if(telemetry.antenna==='swap')[l,r]=[r,l];s.olfactory_left=l;s.olfactory_right=r;}
+  const b=banana.visible?telemetry.banana:null;if(b){const dx=b.x-pz.x,dy=b.y-pz.y,dist=Math.hypot(dx,dy),bearing=Math.atan2(dy,dx)-pz.yaw;const st=.95*Math.exp(-dist/3.0)*(.35+.65*(1+Math.cos(bearing))/2);const turnDamp=dist<1.2?Math.max(.05,(dist/1.2)**2):1.0;const sinB=Math.sin(bearing)*turnDamp;let l=st*(.5+.5*sinB),r=st*(.5-.5*sinB);if(telemetry.antenna==='noLeft')l=0;else if(telemetry.antenna==='swap')[l,r]=[r,l];s.olfactory_left=l;s.olfactory_right=r;}
   const t=touchStimulus(ENVS[currentEnv],pz,telemetry.body?.key==='duck'?.18:.35);s.mechanosensory_left=Math.max(s.mechanosensory_left,t.left);s.mechanosensory_right=Math.max(s.mechanosensory_right,t.right);
   telemetry.stimulus=s;return s;}
 // ---- 뇌 워커 ----
@@ -159,7 +161,7 @@ async function runBody(gen){const b=telemetry.body; if(!b)return; let acc=0,prev
     if(!paused){let n=0;while(acc>=b.ctrlDt&&n<4){await b.controlStep();acc-=b.ctrlDt;n++;} if(n===4)acc=0;} else acc=0;
     const st=b.state(); if(b.key==='company'){await new Promise(r=>setTimeout(r,4));continue;} if(st.fallen&&!telemetry.fallenAt)telemetry.fallenAt=now; if(!st.fallen)telemetry.fallenAt=0;
     if(telemetry.fallenAt&&now-telemetry.fallenAt>1500){telemetry.fallenAt=0;b.reset();clearTrail();}
-    const bn=telemetry.banana; const reach=(b.key==='g1'||b.key==='bh'||b.key==='t1')?.65:(b.key==='go1'?.48:.22); if(bn&&banana.visible&&Math.hypot(bn.x-st.x,bn.y-st.y)<reach){telemetry.collected++;let p;for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=(b.key==='duck'?.6:1.0)+Math.random()*(b.key==='duck'?.4:.8);p={x:st.x+d*Math.cos(a),y:st.y+d*Math.sin(a)};if(Math.hypot(p.x,p.y)<7)break;}placeBanana(p.x,p.y);}
+    const bn=telemetry.banana; const reach=(b.key==='g1'||b.key==='bh'||b.key==='t1')?.95:(b.key==='go1'?.6:.28); if(bn&&banana.visible&&Math.hypot(bn.x-st.x,bn.y-st.y)<reach){telemetry.collected++;let p;for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=(b.key==='duck'?.6:1.0)+Math.random()*(b.key==='duck'?.4:.8);p={x:st.x+d*Math.cos(a),y:st.y+d*Math.sin(a)};if(Math.hypot(p.x,p.y)<7)break;}placeBanana(p.x,p.y);}
     await new Promise(r=>setTimeout(r,4));}}
 const urlParams = new URLSearchParams(location.search);
 const initialBody = urlParams.get('body') || 'duck';
