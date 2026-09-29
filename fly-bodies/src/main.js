@@ -46,9 +46,9 @@ banana.add(tipMesh);
 const glow=new THREE.Mesh(new THREE.CircleGeometry(.3,32),new THREE.MeshBasicMaterial({color:0xffd60a,transparent:true,opacity:.25,depthWrite:false}));
 glow.rotation.x=-Math.PI/2; glow.position.y=.004; banana.add(glow); scene.add(banana);
 
-// 검은색 선명한 로봇 이동 궤적 선 (Black Trail Line)
+// 검은색 선명한 로봇 이동 궤적 점선 (Black Dashed Trail Line)
 const trailGeo=new THREE.BufferGeometry();
-const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0x1e293b,transparent:true,opacity:.85}));
+const trail=new THREE.Line(trailGeo,new THREE.LineDashedMaterial({color:0x000000,dashSize:0.06,gapSize:0.04,transparent:true,opacity:.85}));
 scene.add(trail); const trailPts=[];
 function placeBanana(x,y){telemetry.banana={x,y}; banana.position.set(x,0,-y); pulse=1;}
 let pulse=0; placeBanana(1.2,0.6);
@@ -153,7 +153,7 @@ let lastRender=performance.now();
 function render(){requestAnimationFrame(render);const now=performance.now(),rdt=Math.min(.05,(now-lastRender)/1000);lastRender=now;const b=telemetry.body;if(b&&b.key==='company'){b.update3D(rdt);b.draw();controls.update();renderer.render(scene,camera);const st=b.state();$('fCmd').textContent=`가격 ${st.cmd[0].toFixed(1)} · 광고 ${Math.round(st.cmd[1])}`;$('fDist').textContent=`현금 ${Math.round(st.cash).toLocaleString()}`;$('fPol').textContent=String(st.day);$('count').textContent=st.bankrupt?'파산':`${st.day}일`;$('statusText').textContent=st.bankrupt?'파산 · 리셋':'운영 중';return;}
 if(b){const st=b.state();
     if(follow){const target=new THREE.Vector3(st.x,b.camHeight??.25,-st.y);const before=controls.target.clone();controls.target.lerp(target,.08);camera.position.add(controls.target.clone().sub(before));}
-    if(!trailPts.length||Math.hypot(st.x-trailPts.at(-1).x,-st.y-trailPts.at(-1).z)>.02){trailPts.push(new THREE.Vector3(st.x,.015,-st.y));if(trailPts.length>600)trailPts.shift();trail.geometry.setFromPoints(trailPts);}
+    if(!trailPts.length||Math.hypot(st.x-trailPts.at(-1).x,-st.y-trailPts.at(-1).z)>.02){trailPts.push(new THREE.Vector3(st.x,.015,-st.y));if(trailPts.length>600)trailPts.shift();trail.geometry.setFromPoints(trailPts);trail.computeLineDistances();}
     const a=telemetry.activity||{},s=telemetry.stimulus||{};
     $('fIn').textContent=`${fmt(s.olfactory_left)} · ${fmt(s.olfactory_right)}`;$('fTouch').textContent=`${fmt(s.mechanosensory_left)} · ${fmt(s.mechanosensory_right)}`;$('fAL').textContent=`${pct(a.scentLeft)}% · ${pct(a.scentRight)}%`;$('fDN').textContent=`${(100*(((a.left||0)+(a.right||0))/2)).toFixed(2)}%`;$('fMot').textContent=`${(100*(a.motorLeft||0)).toFixed(2)} · ${(100*(a.motorRight||0)).toFixed(2)}%`;
     $('fCmd').textContent=`${fmt(st.cmd[0])} m/s · ${fmt(st.cmd[2])} rad/s`;$('fDist').textContent=`${fmt(st.distance)} m`;$('fPol').textContent=st.policyCalls.toLocaleString();$('fSpk').textContent=(a.spikes||0).toLocaleString();
