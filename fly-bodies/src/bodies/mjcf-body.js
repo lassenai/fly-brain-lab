@@ -54,7 +54,7 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
     if(cfg.obs==='g1'){phase=phase.map(p=>{const v=p+phaseDt;return ((v+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;});}
     const p=pose(); if(prev)distance+=Math.hypot(p.x-prev.x,p.y-prev.y); prev=p;
     const upz=data.site_xmat[9*imu+8]; fallen=p.z<cfg.minZ||upz<cfg.minUp; sync();}
-  function setCommand(forward,turn){let fwd=Math.max(0,forward);if(fwd>0.0005)fwd=Math.max(0.08,fwd);const vx=Math.max(0,Math.min(1,fwd/0.24))*cfg.cmdScale.vx, wz=Math.max(-1,Math.min(1,turn/0.7))*cfg.cmdScale.wz; cmd=[vx,0,wz];}
+  function setCommand(forward,turn){const targetVx=Math.max(0,Math.min(0.6,forward/0.24))*cfg.cmdScale.vx, targetWz=Math.max(-1,Math.min(1,turn/0.7))*cfg.cmdScale.wz; cmd[0]+=0.25*(targetVx-cmd[0]); cmd[2]+=0.25*(targetWz-cmd[2]);}
   function dispose(){scene.remove(root);try{data.delete();model.delete();vfs.delete();}catch(e){}session.release?.().catch?.(()=>{});}
   reset();
   return {key:cfg.key,reset,controlStep,setCommand,pose,root,dispose,ctrlDt:cfg.ctrlDt,camDist:cfg.camDist,camHeight:cfg.camHeight,

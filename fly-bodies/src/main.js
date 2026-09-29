@@ -24,31 +24,31 @@ const grid=new THREE.GridHelper(24,48,0x9b9588,0xd0c9bb); grid.position.y=.002; 
 const banana=new THREE.Group();
 const bMat=new THREE.MeshStandardMaterial({color:0xffe135,emissive:0xffa800,emissiveIntensity:.18,roughness:.35,metalness:.05});
 const bCurve=new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-.075,.025,0),
-  new THREE.Vector3(-.03,.01,0),
-  new THREE.Vector3(.025,.02,0),
-  new THREE.Vector3(.065,.06,0)
+  new THREE.Vector3(-.05,.018,0),
+  new THREE.Vector3(-.02,.008,0),
+  new THREE.Vector3(.02,.014,0),
+  new THREE.Vector3(.048,.042,0)
 ]);
-// 소형화된 5각 단면 바나나 지오메트리 (길이 축소)
-const bMesh=new THREE.Mesh(new THREE.TubeGeometry(bCurve,24,.014,5,false),bMat);
+// 바나나 길이는 짧고 두툼하게 (Short & Thicker)
+const bMesh=new THREE.Mesh(new THREE.TubeGeometry(bCurve,24,.025,6,false),bMat);
 bMesh.castShadow=true; bMesh.receiveShadow=true; banana.add(bMesh);
 // 바나나 꼭지 (Stem)
 const stemMat=new THREE.MeshStandardMaterial({color:0x4d6124,roughness:.6});
-const stemCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.075,.025,0),new THREE.Vector3(-.095,.035,0)]);
-const stemMesh=new THREE.Mesh(new THREE.TubeGeometry(stemCurve,6,.007,5,false),stemMat);
+const stemCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.05,.018,0),new THREE.Vector3(-.068,.025,0)]);
+const stemMesh=new THREE.Mesh(new THREE.TubeGeometry(stemCurve,6,.012,5,false),stemMat);
 stemMesh.castShadow=true; banana.add(stemMesh);
 // 바나나 밑동 팁 (Tip)
 const tipMat=new THREE.MeshStandardMaterial({color:0x221100,roughness:.8});
-const tipCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(.065,.06,0),new THREE.Vector3(.078,.07,0)]);
-const tipMesh=new THREE.Mesh(new THREE.TubeGeometry(tipCurve,6,.006,5,false),tipMat);
+const tipCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(.048,.042,0),new THREE.Vector3(.058,.05,0)]);
+const tipMesh=new THREE.Mesh(new THREE.TubeGeometry(tipCurve,6,.010,5,false),tipMat);
 banana.add(tipMesh);
 // 바나나 노란색 광륜 (Glow)
-const glow=new THREE.Mesh(new THREE.CircleGeometry(.35,32),new THREE.MeshBasicMaterial({color:0xffd60a,transparent:true,opacity:.25,depthWrite:false}));
+const glow=new THREE.Mesh(new THREE.CircleGeometry(.3,32),new THREE.MeshBasicMaterial({color:0xffd60a,transparent:true,opacity:.25,depthWrite:false}));
 glow.rotation.x=-Math.PI/2; glow.position.y=.004; banana.add(glow); scene.add(banana);
 
-// 선명한 로봇 이동 궤적 선 (Trail Line)
+// 검은색 선명한 로봇 이동 궤적 선 (Black Trail Line)
 const trailGeo=new THREE.BufferGeometry();
-const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xffd60a,transparent:true,opacity:.9}));
+const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0x1e293b,transparent:true,opacity:.85}));
 scene.add(trail); const trailPts=[];
 function placeBanana(x,y){telemetry.banana={x,y}; banana.position.set(x,0,-y); pulse=1;}
 let pulse=0; placeBanana(1.2,0.6);

@@ -323,9 +323,9 @@ function step(dt) {
   state.legPhase[0] += dt * (state.v * 16 + mL * 300);
   state.legPhase[1] += dt * (state.v * 16 + mR * 300);
 
-  // 3D 위치 및 회전 업데이트 (Three.js Z-up / Y-up 좌표 매핑: z = -y)
+  // 3D 위치 및 회전 업데이트 (Three.js Z-up / Y-up 좌표 매핑: z = -y, 머리가 전진 방향 정면을 향함)
   fly3D.root.position.set(state.x, 0, -state.y);
-  fly3D.root.rotation.y = state.yaw - Math.PI / 2;
+  fly3D.root.rotation.y = -state.yaw + Math.PI / 2;
 
   // 3D 삼각 걸음 애니메이션 (Leg Swinging)
   fly3D.legs.forEach((leg, idx) => {
