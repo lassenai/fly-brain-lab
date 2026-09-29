@@ -68,48 +68,73 @@ function step(dt) {
   state.pulse = Math.max(0, state.pulse - dt * .9);
 }
 
+const flyImg = new Image();
+let flyImgLoaded = false;
+flyImg.onload = () => { flyImgLoaded = true; };
+flyImg.src = './flybody.png';
+
 // ---- 그림 ----
 function drawFly(x, y, yaw, s) {
   const k = 24, X = px(x), Y = py(y);
   // 그림자
   ctx.save(); ctx.translate(X + 6, Y + 8); ctx.rotate(-yaw + Math.PI / 2); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.ellipse(0, k * .3, k * .75, k * 1.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   ctx.save(); ctx.translate(X, Y); ctx.rotate(-yaw + Math.PI / 2);
-  // 다리 6개 (삼각 걸음), 3마디
-  for (let i = 0; i < 3; i++) for (const side of [-1, 1]) {
-    const ph = state.legPhase[side < 0 ? 0 : 1] + (i % 2 === 0 ? 0 : Math.PI) + (side < 0 ? Math.PI : 0);
-    const swing = Math.sin(ph) * .32, lift = Math.max(0, Math.cos(ph)) * .15;
-    const bx = side * k * .5, by = (i - 1) * k * .5;
-    const j1x = bx + side * k * .75, j1y = by + swing * k * .8 - k * .25;
-    const j2x = bx + side * k * 1.25, j2y = by + swing * k * 1.5 + k * .1;
-    const fx = bx + side * k * 1.45, fy = by + swing * k * 1.9 + k * .55 - lift * k;
-    ctx.strokeStyle = `rgba(215,222,232,${.85 - lift * 1.2})`; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(j1x, j1y); ctx.lineTo(j2x, j2y); ctx.lineTo(fx, fy); ctx.stroke();
-    ctx.fillStyle = '#e8ecf3'; ctx.beginPath(); ctx.arc(fx, fy, 1.6, 0, Math.PI * 2); ctx.fill();
-  }
-  // 날개 (반투명, 무지개빛, 시맥)
-  for (const side of [-1, 1]) {
-    ctx.save(); ctx.translate(side * k * .35, k * .25); ctx.rotate(side * .32 + Math.sin(performance.now() / 900) * .02);
-    const g = ctx.createLinearGradient(0, -k, 0, k * 1.6); g.addColorStop(0, 'rgba(190,215,255,.30)'); g.addColorStop(.5, 'rgba(255,230,200,.18)'); g.addColorStop(1, 'rgba(170,240,255,.22)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(side * k * .25, k * .5, k * .48, k * 1.25, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(200,220,255,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, -k * .5); ctx.lineTo(side * k * .3, k * 1.6); ctx.moveTo(0, -k * .3); ctx.lineTo(side * k * .62, k * 1.2); ctx.moveTo(0, 0); ctx.lineTo(side * k * .7, k * .55); ctx.stroke();
+
+  if (flyImgLoaded) {
+    // flybody.png 이미지 적용 (Flybody 렌더링)
+    const imgWidth = k * 3.8, imgHeight = k * 4.2;
+    ctx.save();
+    // 걸음에 따른 미세 락킹(Locking) & 수평 보정
+    const bob = Math.sin((state.legPhase[0] + state.legPhase[1])) * 1.5;
+    ctx.drawImage(flyImg, -imgWidth / 2, -imgHeight / 2 + bob, imgWidth, imgHeight);
     ctx.restore();
-  }
-  // 배: 줄무늬
-  let g = ctx.createRadialGradient(-k * .15, k * .5, 2, 0, k * .75, k * 1.1); g.addColorStop(0, '#6c778c'); g.addColorStop(1, '#232a38');
-  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, k * .8, k * .46, k * .95, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = 'rgba(15,18,26,.6)'; ctx.lineWidth = 2; for (let i = 0; i < 4; i++) { const yy = k * .45 + i * k * .28; ctx.beginPath(); ctx.ellipse(0, yy, k * .44 * Math.sqrt(1 - ((yy - k * .8) / (k * .95)) ** 2), k * .1, 0, Math.PI, 2 * Math.PI, true); ctx.stroke(); }
-  // 가슴
-  g = ctx.createRadialGradient(-k * .15, -k * .2, 2, 0, -k * .05, k * .7); g.addColorStop(0, '#8b97ad'); g.addColorStop(1, '#3a4356');
-  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, -k * .05, k * .5, k * .6, 0, 0, Math.PI * 2); ctx.fill();
-  // 머리
-  g = ctx.createRadialGradient(-k * .1, -k * .95, 1, 0, -k * .85, k * .5); g.addColorStop(0, '#9aa6bb'); g.addColorStop(1, '#4a5468');
-  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -k * .85, k * .4, 0, Math.PI * 2); ctx.fill();
-  // 눈 (붉은 복안 + 하이라이트)
-  for (const side of [-1, 1]) { g = ctx.createRadialGradient(side * k * .22, -k * 1.0, 1, side * k * .27, -k * .95, k * .2); g.addColorStop(0, '#ff7a6b'); g.addColorStop(1, '#8c1d18'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(side * k * .27, -k * .95, k * .19, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.arc(side * k * .22, -k * 1.02, k * .05, 0, Math.PI * 2); ctx.fill(); }
-  // 더듬이: 냄새 입력 세기로 빛남
-  for (const [side, val] of [[-1, s.olfactory_left], [1, s.olfactory_right]]) {
-    const v = Math.min(1, val); ctx.strokeStyle = `rgba(255,214,10,${.3 + v * .7})`; ctx.lineWidth = 2 + v * 3; ctx.shadowColor = '#ffd60a'; ctx.shadowBlur = 14 * v;
-    ctx.beginPath(); ctx.moveTo(side * k * .12, -k * 1.15); ctx.quadraticCurveTo(side * k * .35, -k * 1.5, side * k * .55, -k * 1.75); ctx.stroke(); ctx.shadowBlur = 0;
-    if (v > .05) { ctx.fillStyle = `rgba(255,214,10,${v})`; ctx.beginPath(); ctx.arc(side * k * .55, -k * 1.75, 2.5 + v * 3, 0, Math.PI * 2); ctx.fill(); }
+
+    // 더듬이: 냄새 입력 세기로 빛남 (Flybody 이미지 머리 앞쪽 위치)
+    for (const [side, val] of [[-1, s.olfactory_left], [1, s.olfactory_right]]) {
+      const v = Math.min(1, val);
+      ctx.strokeStyle = `rgba(255,214,10,${.3 + v * .7})`; ctx.lineWidth = 2 + v * 3; ctx.shadowColor = '#ffd60a'; ctx.shadowBlur = 14 * v;
+      ctx.beginPath(); ctx.moveTo(side * k * .15, -k * 1.2); ctx.quadraticCurveTo(side * k * .4, -k * 1.6, side * k * .6, -k * 1.85); ctx.stroke(); ctx.shadowBlur = 0;
+      if (v > .05) { ctx.fillStyle = `rgba(255,214,10,${v})`; ctx.beginPath(); ctx.arc(side * k * .6, -k * 1.85, 2.5 + v * 3, 0, Math.PI * 2); ctx.fill(); }
+    }
+  } else {
+    // 폴백 벡터 렌더링
+    // 다리 6개 (삼각 걸음), 3마디
+    for (let i = 0; i < 3; i++) for (const side of [-1, 1]) {
+      const ph = state.legPhase[side < 0 ? 0 : 1] + (i % 2 === 0 ? 0 : Math.PI) + (side < 0 ? Math.PI : 0);
+      const swing = Math.sin(ph) * .32, lift = Math.max(0, Math.cos(ph)) * .15;
+      const bx = side * k * .5, by = (i - 1) * k * .5;
+      const j1x = bx + side * k * .75, j1y = by + swing * k * .8 - k * .25;
+      const j2x = bx + side * k * 1.25, j2y = by + swing * k * 1.5 + k * .1;
+      const fx = bx + side * k * 1.45, fy = by + swing * k * 1.9 + k * .55 - lift * k;
+      ctx.strokeStyle = `rgba(215,222,232,${.85 - lift * 1.2})`; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(j1x, j1y); ctx.lineTo(j2x, j2y); ctx.lineTo(fx, fy); ctx.stroke();
+      ctx.fillStyle = '#e8ecf3'; ctx.beginPath(); ctx.arc(fx, fy, 1.6, 0, Math.PI * 2); ctx.fill();
+    }
+    // 날개 (반투명, 무지개빛, 시맥)
+    for (const side of [-1, 1]) {
+      ctx.save(); ctx.translate(side * k * .35, k * .25); ctx.rotate(side * .32 + Math.sin(performance.now() / 900) * .02);
+      const g = ctx.createLinearGradient(0, -k, 0, k * 1.6); g.addColorStop(0, 'rgba(190,215,255,.30)'); g.addColorStop(.5, 'rgba(255,230,200,.18)'); g.addColorStop(1, 'rgba(170,240,255,.22)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(side * k * .25, k * .5, k * .48, k * 1.25, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(200,220,255,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, -k * .5); ctx.lineTo(side * k * .3, k * 1.6); ctx.moveTo(0, -k * .3); ctx.lineTo(side * k * .62, k * 1.2); ctx.moveTo(0, 0); ctx.lineTo(side * k * .7, k * .55); ctx.stroke();
+      ctx.restore();
+    }
+    // 배: 줄무늬
+    let g = ctx.createRadialGradient(-k * .15, k * .5, 2, 0, k * .75, k * 1.1); g.addColorStop(0, '#6c778c'); g.addColorStop(1, '#232a38');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, k * .8, k * .46, k * .95, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(15,18,26,.6)'; ctx.lineWidth = 2; for (let i = 0; i < 4; i++) { const yy = k * .45 + i * k * .28; ctx.beginPath(); ctx.ellipse(0, yy, k * .44 * Math.sqrt(1 - ((yy - k * .8) / (k * .95)) ** 2), k * .1, 0, Math.PI, 2 * Math.PI, true); ctx.stroke(); }
+    // 가슴
+    g = ctx.createRadialGradient(-k * .15, -k * .2, 2, 0, -k * .05, k * .7); g.addColorStop(0, '#8b97ad'); g.addColorStop(1, '#3a4356');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, -k * .05, k * .5, k * .6, 0, 0, Math.PI * 2); ctx.fill();
+    // 머리
+    g = ctx.createRadialGradient(-k * .1, -k * .95, 1, 0, -k * .85, k * .5); g.addColorStop(0, '#9aa6bb'); g.addColorStop(1, '#4a5468');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -k * .85, k * .4, 0, Math.PI * 2); ctx.fill();
+    // 눈 (붉은 복안 + 하이라이트)
+    for (const side of [-1, 1]) { g = ctx.createRadialGradient(side * k * .22, -k * 1.0, 1, side * k * .27, -k * .95, k * .2); g.addColorStop(0, '#ff7a6b'); g.addColorStop(1, '#8c1d18'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(side * k * .27, -k * .95, k * .19, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.arc(side * k * .22, -k * 1.02, k * .05, 0, Math.PI * 2); ctx.fill(); }
+    // 더듬이: 냄새 입력 세기로 빛남
+    for (const [side, val] of [[-1, s.olfactory_left], [1, s.olfactory_right]]) {
+      const v = Math.min(1, val); ctx.strokeStyle = `rgba(255,214,10,${.3 + v * .7})`; ctx.lineWidth = 2 + v * 3; ctx.shadowColor = '#ffd60a'; ctx.shadowBlur = 14 * v;
+      ctx.beginPath(); ctx.moveTo(side * k * .12, -k * 1.15); ctx.quadraticCurveTo(side * k * .35, -k * 1.5, side * k * .55, -k * 1.75); ctx.stroke(); ctx.shadowBlur = 0;
+      if (v > .05) { ctx.fillStyle = `rgba(255,214,10,${v})`; ctx.beginPath(); ctx.arc(side * k * .55, -k * 1.75, 2.5 + v * 3, 0, Math.PI * 2); ctx.fill(); }
+    }
   }
   ctx.restore();
 }
