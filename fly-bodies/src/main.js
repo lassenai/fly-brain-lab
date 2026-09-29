@@ -70,12 +70,14 @@ async function switchBody(key,envKey=currentEnv){
   for(const b of document.querySelectorAll('[data-env]'))b.setAttribute('aria-pressed',String(b.dataset.env===envKey)); $('envNote').textContent=ENVS[envKey].note;
   if(envGroup){scene.remove(envGroup);envGroup=null;} envGroup=envMeshes(ENVS[envKey]); scene.add(envGroup);
   for(const b of document.querySelectorAll('[data-body]'))b.setAttribute('aria-pressed',String(b.dataset.body===key));
-  telemetry.bodyReady=false; $('loading').hidden=false; $('loading').firstElementChild.textContent='몸을 바꾸는 중…'; $('prog').value=0; $('progText').textContent='';
+  telemetry.bodyReady=false; $('loading').hidden=false; $('loading').style.display='flex'; $('loading').firstElementChild.textContent='몸을 바꾸는 중…'; $('prog').value=0; $('progText').textContent='';
   if(telemetry.body){telemetry.body.dispose();telemetry.body=null;}
   clearTrail(); telemetry.collected=0;
   const isCo=key==='company'; banana.visible=!isCo; if(envGroup)envGroup.visible=!isCo; $('sceneHint').hidden=isCo; $('chartHost').hidden=!isCo; $('brain').style.visibility=isCo?'hidden':''; $('brainTitle').textContent=isCo?'회사 결산 · 실시간':'초파리 뇌 · 실시간 발화'; $('legendBox').hidden=isCo; $('coHint').hidden=!isCo;
   for(const b of document.querySelectorAll('[data-env]')){const k=b.dataset.env;b.textContent=isCo?COMPANY_ENVS[k].name:ENVS[k].name;} $('envNote').textContent=isCo?COMPANY_ENVS[envKey].note:ENVS[envKey].note;
-  try{const b=await FACTORY[key](t=>{$('loading').firstElementChild.textContent=t;},envXml(ENVS[envKey]),envKey);
+  try{
+    await new Promise(r => requestAnimationFrame(r));
+    const b=await FACTORY[key](t=>{$('loading').firstElementChild.textContent=t;},envXml(ENVS[envKey]),envKey);
     if(gen!==generation){b.dispose();return;}
     telemetry.body=b; telemetry.bodyReady=true; setJointBars(b.info.joints); $('bodyStat').textContent=b.info.name; $('bodyInfo').textContent=`${b.info.model} · 정책 ${b.info.policy} · 관측 ${b.info.obs}개 → 관절 ${b.info.joints}개`;
     if(isCo){camera.position.set(6.2,4.2,7.4);controls.target.set(0,.7,.4);telemetry.body=b;telemetry.bodyReady=true;setJointBars(0);$('bodyStat').textContent=b.info.name;$('bodyInfo').textContent=`${b.info.model} · 두뇌 입력 ${b.info.obs}개 → 가격·광고·발주`;applyCompanyBrain();telemetry.switching=false;maybeStart();if(telemetry.ready)runBody(gen);return;}
