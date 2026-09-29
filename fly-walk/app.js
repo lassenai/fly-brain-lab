@@ -315,8 +315,9 @@ $('reset').onclick = () => {
 function step(dt) {
   if (!ready) return;
   const c = activity?.command || { forward: 0, turn: 0 };
-  state.v += (c.forward * 1.5 - state.v) * Math.min(1, dt * 5);
-  state.w += (c.turn - state.w) * Math.min(1, dt * 5);
+  state.v += (c.forward * 1.5 - state.v) * Math.min(1, dt * 8);
+  state.w += (c.turn - state.w) * Math.min(1, dt * 8);
+  if (Math.abs(c.turn) < 0.03) state.w *= 0.82;
 
   state.yaw += state.w * dt;
   state.x += Math.cos(state.yaw) * state.v * dt;
