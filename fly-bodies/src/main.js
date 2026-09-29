@@ -21,55 +21,17 @@ const rim=new THREE.PointLight(0x6b7036,4,6); rim.position.set(0,1.5,-2); scene.
 const floor=new THREE.Mesh(new THREE.CircleGeometry(12,64),new THREE.MeshStandardMaterial({color:0xe5e0d4,roughness:.9,metalness:.05})); floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
 const grid=new THREE.GridHelper(24,48,0x9b9588,0xd0c9bb); grid.position.y=.002; scene.add(grid);
 // 바나나 (z-up 좌표를 y-up으로): three (x, 0, -y)
-const banana=new THREE.Group();
-const bMat=new THREE.MeshStandardMaterial({color:0xffe135,emissive:0xffa800,emissiveIntensity:.18,roughness:.35,metalness:.05});
-const bCurve=new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-.05,.018,0),
-  new THREE.Vector3(-.02,.008,0),
-  new THREE.Vector3(.02,.014,0),
-  new THREE.Vector3(.048,.042,0)
-]);
-// 바나나 길이는 짧고 두툼하게 (Short & Thicker)
-const bMesh=new THREE.Mesh(new THREE.TubeGeometry(bCurve,24,.025,6,false),bMat);
-bMesh.castShadow=true; bMesh.receiveShadow=true; banana.add(bMesh);
-// 바나나 꼭지 (Stem)
-const stemMat=new THREE.MeshStandardMaterial({color:0x4d6124,roughness:.6});
-const stemCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.05,.018,0),new THREE.Vector3(-.068,.025,0)]);
-const stemMesh=new THREE.Mesh(new THREE.TubeGeometry(stemCurve,6,.012,5,false),stemMat);
-stemMesh.castShadow=true; banana.add(stemMesh);
-// 바나나 밑동 팁 (Tip)
-const tipMat=new THREE.MeshStandardMaterial({color:0x221100,roughness:.8});
-const tipCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(.048,.042,0),new THREE.Vector3(.058,.05,0)]);
-const tipMesh=new THREE.Mesh(new THREE.TubeGeometry(tipCurve,6,.010,5,false),tipMat);
-banana.add(tipMesh);
-// 바나나 노란색 광륜 (Glow)
-const glow=new THREE.Mesh(new THREE.CircleGeometry(.55,32),new THREE.MeshBasicMaterial({color:0xffd60a,transparent:true,opacity:.28,depthWrite:false}));
-glow.rotation.x=-Math.PI/2; glow.position.y=.004; banana.add(glow); 
-banana.scale.set(1.8,1.8,1.8);
-scene.add(banana);
-
-// 검은색 선명한 로봇 이동 궤적 점선 (Black Dashed Trail Line)
-const trail=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineDashedMaterial({color:0x000000,dashSize:0.06,gapSize:0.04,transparent:true,opacity:.85}));
-scene.add(trail); const trailPts=[];
+const banana=new THREE.Group(); const bMat=new THREE.MeshStandardMaterial({color:0x6b7036,emissive:0x484c24,emissiveIntensity:.4,roughness:.4});
+const bCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.16,.05,0),new THREE.Vector3(-.06,.03,0),new THREE.Vector3(.06,.05,0),new THREE.Vector3(.15,.12,0)]); const bMesh=new THREE.Mesh(new THREE.TubeGeometry(bCurve,24,.028,10,false),bMat); bMesh.castShadow=true; banana.add(bMesh);
+const glow=new THREE.Mesh(new THREE.CircleGeometry(.9,48),new THREE.MeshBasicMaterial({color:0x6b7036,transparent:true,opacity:.18,depthWrite:false})); glow.rotation.x=-Math.PI/2; glow.position.y=.004; banana.add(glow); scene.add(banana);
+const trailGeo=new THREE.BufferGeometry(); const trail=new THREE.Line(trailGeo,new THREE.LineDashedMaterial({color:0x6b7036,dashSize:.06,gapSize:.06,transparent:true,opacity:.8})); scene.add(trail); const trailPts=[];
 function clearTrail(){
   trailPts.length=0;
   if(trail.geometry){trail.geometry.dispose();}
   trail.geometry=new THREE.BufferGeometry();
 }
 function updateTrail(x,y){
-  const pt=new THREE.Vector3(x,.015,-y);
-  if(!trailPts.length||Math.hypot(pt.x-trailPts.at(-1).x,pt.z-trailPts.at(-1).z)>.02){
-    trailPts.push(pt);
-    if(trailPts.length>600)trailPts.shift();
-    if(trailPts.length>=2){
-      const oldGeo=trail.geometry;
-      const newGeo=new THREE.BufferGeometry().setFromPoints(trailPts);
-      trail.geometry=newGeo;
-      trail.computeLineDistances();
-      trail.geometry.computeBoundingSphere();
-      if(oldGeo)oldGeo.dispose();
-    }
-  }
+  if(!trailPts.length||Math.hypot(x-trailPts.at(-1).x,-y-trailPts.at(-1).z)>.03){trailPts.push(new THREE.Vector3(x,.01,-y));if(trailPts.length>800)trailPts.shift();trail.geometry.dispose();trail.geometry=new THREE.BufferGeometry().setFromPoints(trailPts);trail.computeLineDistances();}
 }
 function placeBanana(x,y){
   telemetry.banana={x,y};
@@ -84,7 +46,7 @@ renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clie
 new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}).observe(host);
 // ---- 냄새 센서 (microfly 공식) ----
 function stimulus(){const pz=telemetry.body?.pose()||{x:0,y:0,yaw:0};const s={visual_left:.45*.65,visual_right:.45*.65,olfactory_left:0,olfactory_right:0,mechanosensory_left:0,mechanosensory_right:0};
-  const b=banana.visible?telemetry.banana:null;if(b){const dx=b.x-pz.x,dy=b.y-pz.y,dist=Math.hypot(dx,dy),bearing=Math.atan2(dy,dx)-pz.yaw;const st=.95*Math.exp(-dist/3.0)*(.35+.65*(1+Math.cos(bearing))/2);const turnDamp=dist<1.2?Math.max(.05,(dist/1.2)**2):1.0;const sinB=Math.sin(bearing)*turnDamp;let l=st*(.5+.5*sinB),r=st*(.5-.5*sinB);if(telemetry.antenna==='noLeft')l=0;else if(telemetry.antenna==='swap')[l,r]=[r,l];s.olfactory_left=l;s.olfactory_right=r;}
+  const b=banana.visible?telemetry.banana:null;if(b){const dx=b.x-pz.x,dy=b.y-pz.y,bearing=Math.atan2(dy,dx)-pz.yaw;const st=.95*Math.exp(-Math.hypot(dx,dy)/1.6)*(.25+.75*(1+Math.cos(bearing))/2);let l=st*(.5+.5*Math.sin(bearing)),r=st*(.5-.5*Math.sin(bearing));if(telemetry.antenna==='noLeft')l=0;else if(telemetry.antenna==='swap')[l,r]=[r,l];s.olfactory_left=l;s.olfactory_right=r;}
   const t=touchStimulus(ENVS[currentEnv],pz,telemetry.body?.key==='duck'?.18:.35);s.mechanosensory_left=Math.max(s.mechanosensory_left,t.left);s.mechanosensory_right=Math.max(s.mechanosensory_right,t.right);
   telemetry.stimulus=s;return s;}
 // ---- 뇌 워커 ----
@@ -161,11 +123,9 @@ async function runBody(gen){const b=telemetry.body; if(!b)return; let acc=0,prev
     if(!paused){let n=0;while(acc>=b.ctrlDt&&n<4){await b.controlStep();acc-=b.ctrlDt;n++;} if(n===4)acc=0;} else acc=0;
     const st=b.state(); if(b.key==='company'){await new Promise(r=>setTimeout(r,4));continue;} if(st.fallen&&!telemetry.fallenAt)telemetry.fallenAt=now; if(!st.fallen)telemetry.fallenAt=0;
     if(telemetry.fallenAt&&now-telemetry.fallenAt>1500){telemetry.fallenAt=0;b.reset();clearTrail();}
-    const bn=telemetry.banana; const reach=(b.key==='g1'||b.key==='bh'||b.key==='t1')?.95:(b.key==='go1'?.6:.28); if(bn&&banana.visible&&Math.hypot(bn.x-st.x,bn.y-st.y)<reach){telemetry.collected++;let p;for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=(b.key==='duck'?.6:1.0)+Math.random()*(b.key==='duck'?.4:.8);p={x:st.x+d*Math.cos(a),y:st.y+d*Math.sin(a)};if(Math.hypot(p.x,p.y)<7)break;}placeBanana(p.x,p.y);}
+    const bn=telemetry.banana; const reach=b.key==='duck'?.18:.35; if(bn&&banana.visible&&Math.hypot(bn.x-st.x,bn.y-st.y)<reach){telemetry.collected++;let p;for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=(b.key==='duck'?.7:1.6)+Math.random()*(b.key==='duck'?.5:1.6);p={x:st.x+d*Math.cos(a),y:st.y+d*Math.sin(a)};if(Math.hypot(p.x,p.y)<7)break;}placeBanana(p.x,p.y);}
     await new Promise(r=>setTimeout(r,4));}}
-const urlParams = new URLSearchParams(location.search);
-const initialBody = urlParams.get('body') || 'duck';
-switchBody(initialBody);
+switchBody('go1');
 // ---- 렌더 + 수치 ----
 $('reset').onclick=()=>{telemetry.body?.reset();clearTrail();worker.postMessage({type:'reset'});telemetry.collected=0;};
 $('clear').onclick=()=>{banana.visible=false;};

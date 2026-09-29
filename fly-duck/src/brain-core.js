@@ -73,25 +73,18 @@ export function decode(activity, connected=true) {
   const {left,right,scentLeft,scentRight}=activity;
   if(!connected || ![left,right,scentLeft,scentRight].every(Number.isFinite))return {forward:0,turn:0};
   const odor=scentLeft+scentRight;
-  if(odor<.0005||left+right<=0) {
-    if(left+right>0.0001) {
-      const drive=Math.min(1,(left+right)/.001);
-      return {forward:.08*drive,turn:(left>right?0.3:-0.3)};
-    }
-    return {forward:0,turn:0};
-  }
-  const contrast=(scentLeft-scentRight)/Math.max(.012,odor);
-  const drive=Math.min(1,(left+right)/.0004)*Math.min(1,(odor-.0002)/.025);
-  const fwdDrive=Math.max(0.18,drive);
-  return {forward:.25*fwdDrive*(1-Math.min(.15,Math.abs(contrast)*.5)),turn:.75*Math.tanh(contrast*5)};
+  if(odor<.008||left+right<=0)return {forward:0,turn:0};
+  const contrast=(scentLeft-scentRight)/Math.max(.02,odor);
+  const drive=Math.min(1,(left+right)/.0006)*Math.min(1,(odor-.008)/.04);
+  return {forward:.24*drive*(1-Math.min(.15,Math.abs(contrast)*.5)),turn:.7*Math.tanh(contrast*5)};
 }
 
 export class NeuralDecoder {
   constructor(){this.reset();}
   reset(){this.filtered={left:0,right:0,scentLeft:0,scentRight:0};this.motorRates=new Float32Array(28);}
   update(activity){
-    for(const name of Object.keys(this.filtered))this.filtered[name]+=.35*(activity[name]-this.filtered[name]);
-    activity.motorRates.forEach((v,i)=>this.motorRates[i]+=.35*(v-this.motorRates[i]));
+    for(const name of Object.keys(this.filtered))this.filtered[name]+=.3*(activity[name]-this.filtered[name]);
+    activity.motorRates.forEach((v,i)=>this.motorRates[i]+=.3*(v-this.motorRates[i]));
     const motors=Array.from({length:14},(_,i)=>Math.tanh(80*(this.motorRates[2*i]-this.motorRates[2*i+1])));
     return {command:decode(this.filtered),motors,filtered:{...this.filtered}};
   }

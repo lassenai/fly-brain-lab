@@ -7,7 +7,7 @@ export async function createDuck(scene,onStatus=()=>{},envXml=''){
   const pose=()=>{const s=sim.state();return {x:s.x,y:s.y,z:s.height,yaw:s.yaw};};
   return {key:'duck',reset:()=>{sim.reset();distance=0;prev=null;},
     controlStep:async()=>{await sim.step({forward:cmd.forward,turn:cmd.turn});const p=pose();if(prev)distance+=Math.hypot(p.x-prev.x,p.y-prev.y);prev=p;},
-    setCommand:(forward,turn)=>{const targetFwd=Math.max(0,Math.min(0.35,forward));cmd.forward+=0.35*(targetFwd-cmd.forward);cmd.turn+=0.35*(turn-cmd.turn);},pose,root:sim.rig.placer,dispose:()=>{scene.remove(sim.rig.placer);sim.free?.();},ctrlDt:.02,camDist:1.4,camHeight:.12,
+    setCommand:(forward,turn)=>{cmd={forward:Math.max(0,forward),turn};},pose,root:sim.rig.placer,dispose:()=>{scene.remove(sim.rig.placer);sim.free?.();},ctrlDt:.02,camDist:1.4,camHeight:.12,
     state:()=>{const s=sim.state();return {steps:s.steps,policyCalls:s.policyCalls,fallen:s.fallen,distance,cmd:[cmd.forward,0,cmd.turn],joints:s.joints.map((v,i)=>s.targets[i]-v),...pose()};},
     info:{name:'마이크로덕 (Pollen Robotics)',joints:14,policy:'Pollen Robotics BEST_alpha_walking.onnx (Apache-2.0)',model:'MicroDuck simulator (Apache-2.0)',obs:61}};
 }

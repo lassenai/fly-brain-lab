@@ -26,8 +26,8 @@ export async function createDuckSim(onStatus,onProgress,envXml='') {
     vfs.addBuffer(`assets/${f}`,new Uint8Array(geometryToBinaryStl(geometry.welded)));
   }
   const add=(parent,tag,attrs)=>{const e=doc.createElement(tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,String(v));parent.appendChild(e);return e;};
-  add(doc.documentElement,'option',{timestep:.004});
-  add(doc.querySelector('worldbody'),'geom',{type:'plane',name:'floor',size:'0 0 .05',friction:'1.4 .01 .001'});
+  add(doc.documentElement,'option',{timestep:.005});
+  add(doc.querySelector('worldbody'),'geom',{type:'plane',name:'floor',size:'0 0 .05',friction:'.8 .005 .0001'});
   // Physical boundary matches the rendered arena. No hidden steering override.
   for(const [name,pos,size] of [['east','2.04 0 .09','.04 2.08 .09'],['west','-2.04 0 .09','.04 2.08 .09'],['north','0 2.04 .09','2.08 .04 .09'],['south','0 -2.04 .09','2.08 .04 .09']])add(doc.querySelector('worldbody'),'geom',{name,type:'box',pos,size});
   for(let k=0;k<4;k++)add(doc.querySelector('worldbody'),'geom',{name:'obs'+k,type:'box',pos:'0 0 -1',size:'.12 .12 .1',rgba:'.4 .45 .55 1'});
@@ -75,7 +75,7 @@ export async function createDuckSim(onStatus,onProgress,envXml='') {
     }
     if(version!==generation)return;
     const ctrl=data.ctrl;for(let i=0;i<14;i++)ctrl[i]=targets[i];
-    for(let i=0;i<5;i++)mj.mj_step(model,data);
+    for(let i=0;i<4;i++)mj.mj_step(model,data);
     const pos=data.qpos;if(!Array.from(pos).every(Number.isFinite))throw Error('Physics became non-finite');
     distance+=Math.hypot(pos[0]-previous[0],pos[1]-previous[1]);previous=[pos[0],pos[1]];steps++;sync();
   }

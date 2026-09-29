@@ -6,7 +6,7 @@ import {createBrainView} from './brain-view.js';
 const $ = id => document.getElementById(id);
 const canvas = $('c');
 const state = { x: 0, y: 0, yaw: Math.PI / 2, v: 0, w: 0, legPhase: [0, 0], collected: 0, banana: { x: 0.5, y: 0.9 }, respawnAt: 0, pulse: 0 };
-const lab = { antenna: 'normal', range: 3.0, light: 0.45 };
+const lab = { antenna: 'normal', range: 1.25, light: 0.45 };
 let activity = null, ready = false, cut = false, lastT = performance.now(), brainView = null, autoRotate = true;
 
 // ---- Three.js 3D 무대 구축 (메탈골드 테마) ----
@@ -172,20 +172,20 @@ const fly3D = createFruitFly3DMesh();
 
 // ---- 3D 바나나 모델 ----
 const bananaGroup = new THREE.Group();
-const bMat = new THREE.MeshStandardMaterial({ color: 0xffe135, emissive: 0xffa800, emissiveIntensity: 0.2, roughness: 0.3 });
+const bMat = new THREE.MeshStandardMaterial({ color: 0x6b7036, emissive: 0x484c24, emissiveIntensity: 0.4, roughness: 0.4 });
 const bCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-0.075, 0.025, 0),
-  new THREE.Vector3(-0.03, 0.01, 0),
-  new THREE.Vector3(0.025, 0.02, 0),
-  new THREE.Vector3(0.065, 0.06, 0)
+  new THREE.Vector3(-0.16, 0.05, 0),
+  new THREE.Vector3(-0.06, 0.03, 0),
+  new THREE.Vector3(0.06, 0.05, 0),
+  new THREE.Vector3(0.15, 0.12, 0)
 ]);
-const bMesh = new THREE.Mesh(new THREE.TubeGeometry(bCurve, 24, 0.014, 5, false), bMat);
+const bMesh = new THREE.Mesh(new THREE.TubeGeometry(bCurve, 24, 0.028, 10, false), bMat);
 bMesh.castShadow = true;
 bananaGroup.add(bMesh);
 
-const bGlow = new THREE.Mesh(new THREE.CircleGeometry(0.35, 32), new THREE.MeshBasicMaterial({ color: 0xffd60a, transparent: true, opacity: 0.25, depthWrite: false }));
+const bGlow = new THREE.Mesh(new THREE.CircleGeometry(0.9, 48), new THREE.MeshBasicMaterial({ color: 0x6b7036, transparent: true, opacity: 0.18, depthWrite: false }));
 bGlow.rotation.x = -Math.PI / 2;
-bGlow.position.y = 0.003;
+bGlow.position.y = 0.004;
 bananaGroup.add(bGlow);
 
 scene.add(bananaGroup);
@@ -234,7 +234,7 @@ function stimulus() {
   const b = bananaGroup.visible ? state.banana : null;
   if (b) {
     const dx = b.x - state.x, dy = b.y - state.y, bearing = Math.atan2(dy, dx) - state.yaw;
-    const st = .95 * Math.exp(-Math.hypot(dx, dy) / lab.range) * (.35 + .65 * (1 + Math.cos(bearing)) / 2);
+    const st = .95 * Math.exp(-Math.hypot(dx, dy) / lab.range) * (.25 + .75 * (1 + Math.cos(bearing)) / 2);
     let l = st * (.5 + .5 * Math.sin(bearing)), r = st * (.5 - .5 * Math.sin(bearing));
     if (lab.antenna === 'noLeft') l = 0; else if (lab.antenna === 'noRight') r = 0; else if (lab.antenna === 'swap') [l, r] = [r, l];
     s.olfactory_left = l; s.olfactory_right = r;
@@ -350,7 +350,7 @@ function step(dt) {
   fly3D.antMatR.color.setHSL(0.12, 1.0, 0.2 + Math.min(1, s.olfactory_right) * 0.7);
 
   // 바나나 수집 검사
-  if (bananaGroup.visible && Math.hypot(state.banana.x - state.x, state.banana.y - state.y) < 0.22) {
+  if (bananaGroup.visible && Math.hypot(state.banana.x - state.x, state.banana.y - state.y) < 0.18) {
     state.collected++;
     bananaGroup.visible = false;
     state.respawnAt = performance.now() + 600;
