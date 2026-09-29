@@ -18,7 +18,7 @@
 |---|---|---|
 | 🪰 **fly-walk** | 초파리 뇌 걷기 — 2D 초파리 + 실시간 3D 뇌 신경망 발화 시뮬레이션 | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-walk/) |
 | 🤖 **fly-bodies** | 한 뇌, 여러 몸 — 유니트리 Go1 로봇 개 · 로봇 싸커 킷 · 마이크로덕 · 유니트리 G1 휴머노이드 (MuJoCo WASM + ONNX) | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-bodies/dist/) |
-| 🦆 **fly-duck** | 마이크로덕 두 뇌 비교 실험실 — 2024 암컷 vs 2026 수컷 뇌 배선 비교 관찰 | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-duck/compare.html) |
+| 🦆 **fly-duck** | FlyWire vs MaleCNS 커넥톰 멀티-브레인 시뮬레이션 — 2024 암컷 vs 2026 수컷 뇌 배선 비교 관찰 | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-duck/compare.html) |
 
 ---
 
