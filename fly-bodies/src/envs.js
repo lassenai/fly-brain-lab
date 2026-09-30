@@ -22,20 +22,14 @@ export function touchStimulus(env,pose,reach){const out={left:0,right:0};if(!env
 
 // 지형(경사/계단/장애물 상자) 위 표면 높이 계산 (바나나가 계단·경사면에 파묻히지 않고 보임)
 export function getTerrainHeight(x,y,envKey){
-  const env=ENVS[envKey]; if(!env||!env.geoms||!env.geoms.length)return 0;
-  let maxH=0;
-  for(const g of env.geoms){
-    if(g.quat&&(g.quat[1]!==0||g.quat[3]!==0)){
-      const dx=x-g.pos[0], dy=y-g.pos[1];
-      if(Math.abs(dx)<=g.size[0]+0.1&&Math.abs(dy)<=g.size[1]+0.1){
-        const rampH=g.pos[2]+g.size[2]+dx*Math.tan(10*Math.PI/180);
-        maxH=Math.max(maxH,rampH);
-      }
-    }else{
-      if(Math.abs(x-g.pos[0])<=g.size[0]+0.05&&Math.abs(y-g.pos[1])<=g.size[1]+0.05){
-        maxH=Math.max(maxH,g.pos[2]+g.size[2]);
-      }
-    }
+  let height=0;
+  for(const g of ENVS[envKey]?.geoms||[]){
+    const rotation=new THREE.Quaternion(g.quat[1],g.quat[2],g.quat[3],g.quat[0]);
+    const position=new THREE.Vector3(...g.pos);
+    const inverse=new THREE.Matrix4().compose(position,rotation,new THREE.Vector3(1,1,1)).invert();
+    const ray=new THREE.Ray(new THREE.Vector3(x,y,100),new THREE.Vector3(0,0,-1)).applyMatrix4(inverse);
+    const extent=new THREE.Vector3(...g.size),hit=ray.intersectBox(new THREE.Box3(extent.clone().negate(),extent),new THREE.Vector3());
+    if(hit)height=Math.max(height,hit.applyQuaternion(rotation).add(position).z);
   }
-  return maxH;
+  return height;
 }

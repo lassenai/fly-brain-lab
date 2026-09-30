@@ -224,6 +224,7 @@ export async function createSoccerKitBody(scene, onStatus = () => {}, envXml = '
     reset,
     controlStep,
     setCommand,
+    setVelocityCommand:(forward,turn)=>{cmd={forward:forward/1.2,turn};},
     pose,
     root,
     dispose,

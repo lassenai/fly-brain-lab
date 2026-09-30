@@ -13,7 +13,27 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
   for(const n of cfg.collideGeoms||[]){const g=doc.querySelector(`geom[name="${n}"]`);if(g){g.setAttribute('contype','1');if(!g.hasAttribute('conaffinity'))g.setAttribute('conaffinity','0');}}
   if(cfg.shell){const b=doc.querySelector(`body[name="${cfg.shell.body}"]`);if(b){const g=doc.createElement('geom');g.setAttribute('name','env_shell');for(const [k,v] of Object.entries(cfg.shell))if(k!=='body')g.setAttribute(k,v);g.setAttribute('density','0');g.setAttribute('contype','2');g.setAttribute('conaffinity','0');g.setAttribute('group','3');b.appendChild(g);}}
   if(envXml){const wb=doc.querySelector('worldbody');const frag=new DOMParser().parseFromString('<r>'+envXml+'</r>','text/xml');for(const g of [...frag.documentElement.children])wb.appendChild(doc.importNode(g,true));}
+  // Contact masks must be present at compile time: MuJoCo caches body-level filters.
+  for(const g of doc.querySelectorAll('worldbody geom[class="visual"]'))g.setAttribute('conaffinity','16');
+  for(const g of doc.querySelectorAll('worldbody > geom'))g.setAttribute('contype',String((Number(g.getAttribute('contype'))||1)|8|(g.getAttribute('type')==='plane'?0:16)));
   const model=mj.MjModel.from_xml_string(new XMLSerializer().serializeToString(doc),vfs), data=new mj.MjData(model);
+  // Reserve bit 8 for external terrain contact; keep the original self-contact masks.
+  for(let g=0;g<model.ngeom;g++){
+    if(model.geom_bodyid[g]===0){
+      model.geom_contype[g]|=8;
+      // Bit 16 covers obstacle solids, including the back and side faces of a ramp.
+      if(model.geom_type[g]!==0)model.geom_contype[g]|=16;
+    }else{
+      model.geom_conaffinity[g]|=16;
+      if(model.geom_group[g]!==2)model.geom_conaffinity[g]|=8;
+    }
+  }
+  // Keep cached body masks in sync with runtime fall contacts as well.
+  for(let b=0;b<model.nbody;b++){
+    model.body_contype[b]|=b===0?24:0;
+    model.body_conaffinity[b]|=b===0?0:24;
+  }
+  const contactMasks=Array.from(model.geom_conaffinity);
   const OBJ=mj.mjtObj, id=(t,n)=>mj.mj_name2id(model,t.value,n);
   const key=id(OBJ.mjOBJ_KEY,cfg.keyframe), rootId=id(OBJ.mjOBJ_BODY,cfg.rootBody), imu=id(OBJ.mjOBJ_SITE,cfg.imuSite);
   if(key<0||rootId<0||imu<0)throw Error(`${cfg.name}: 키프레임/몸통/IMU 이름 확인 필요`);
@@ -38,7 +58,7 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
   onStatus(`${cfg.name}: 부품 ${drawn}개 그림 준비`);
   function pose(){const p=data.xpos,q=data.xquat,i=rootId;const w=q[4*i],x=q[4*i+1],y=q[4*i+2],z=q[4*i+3];return {x:p[3*i],y:p[3*i+1],z:p[3*i+2],yaw:Math.atan2(2*(w*z+x*y),1-2*(y*y+z*z))};}
   function sync(){const p=data.xpos,q=data.xquat;for(const {group,id:i} of bodyGroups){if(i<0)continue;group.position.set(p[3*i],p[3*i+1],p[3*i+2]);group.quaternion.set(q[4*i+1],q[4*i+2],q[4*i+3],q[4*i]);}}
-  function reset(){mj.mj_resetDataKeyframe(model,data,key);mj.mj_forward(model,data);last.fill(0);steps=0;policyCalls=0;fallen=false;distance=0;prev=null;phase=[0,Math.PI];targetYaw=null;sync();}
+  function reset(){for(let g=0;g<model.ngeom;g++)model.geom_conaffinity[g]=contactMasks[g];mj.mj_resetDataKeyframe(model,data,key);mj.mj_forward(model,data);last.fill(0);steps=0;policyCalls=0;fallen=false;distance=0;prev=null;phase=[0,Math.PI];targetYaw=null;sync();}
   function buildObs(){const s=data.sensordata,xm=data.site_xmat,qp=data.qpos,qv=data.qvel;let k=0;
     obs[k++]=s[adrLin];obs[k++]=s[adrLin+1];obs[k++]=s[adrLin+2];obs[k++]=s[adrGyro];obs[k++]=s[adrGyro+1];obs[k++]=s[adrGyro+2];
     obs[k++]=-xm[9*imu+6];obs[k++]=-xm[9*imu+7];obs[k++]=-xm[9*imu+8];
@@ -53,11 +73,18 @@ export async function createMjcfBody(cfg,scene,onStatus=()=>{},envXml=''){
     for(let k=0;k<nSub;k++)mj.mj_step(model,data); steps+=nSub;
     if(cfg.obs==='g1'){phase=phase.map(p=>{const v=p+phaseDt;return ((v+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;});}
     const p=pose(); if(prev)distance+=Math.hypot(p.x-prev.x,p.y-prev.y); prev=p;
-    const upz=data.site_xmat[9*imu+8]; fallen=p.z<cfg.minZ||upz<cfg.minUp; sync();}
+    const upz=data.site_xmat[9*imu+8]; fallen=p.z<cfg.minZ||upz<cfg.minUp;if(fallen)for(let g=0;g<model.ngeom;g++)if(model.geom_bodyid[g]!==0)model.geom_conaffinity[g]|=8;sync();}
   function setCommand(forward,turn){const vx=Math.max(0,Math.min(1,forward/0.24))*cfg.cmdScale.vx, wz=Math.max(-1,Math.min(1,turn/0.7))*cfg.cmdScale.wz; cmd=[vx,0,wz];}
   function dispose(){scene.remove(root);try{data.delete();model.delete();vfs.delete();}catch(e){}session.release?.().catch?.(()=>{});}
   reset();
-  return {key:cfg.key,reset,controlStep,setCommand,pose,root,dispose,ctrlDt:cfg.ctrlDt,camDist:cfg.camDist,camHeight:cfg.camHeight,
+  return {...(new URLSearchParams(location.search).has('terrain-test')?{testTerrainApproach:async(x,y,yaw)=>{
+    reset();cmd=[.4,0,0];data.qpos[0]=x;data.qpos[1]=y;data.qpos[3]=Math.cos(yaw/2);data.qpos[4]=0;data.qpos[5]=0;data.qpos[6]=Math.sin(yaw/2);mj.mj_forward(model,data);let contacts=0;const trace=[];
+    for(let i=0;i<200;i++){await controlStep();contacts=Math.max(contacts,data.ncon);if(i%10===0)trace.push(pose());}return {...pose(),contacts,fallen,trace};
+  },testTerrainDrop:async(x,y,z)=>{
+    cmd=[0,0,0];data.qpos[0]=x;data.qpos[1]=y;data.qpos[2]=z;data.qpos[3]=Math.SQRT1_2;data.qpos[4]=0;data.qpos[5]=Math.SQRT1_2;data.qpos[6]=0;data.qvel.fill(0);mj.mj_forward(model,data);
+    for(let i=0;i<120;i++)await controlStep();return {...pose(),contacts:data.ncon,fallen};
+  }}:{}),key:cfg.key,reset,controlStep,setCommand,pose,root,dispose,ctrlDt:cfg.ctrlDt,camDist:cfg.camDist,camHeight:cfg.camHeight,
+    setVelocityCommand:(forward,turn)=>{cmd=[forward,0,turn];},
     state:()=>({steps,policyCalls,fallen,distance,cmd:[...cmd],joints:Array.from({length:nu},(_,i)=>data.qpos[7+i]-defaults[i]),...pose()}),
     info:{name:cfg.name,joints:nu,policy:cfg.policyLabel,model:cfg.modelLabel,obs:nObs}};
 }

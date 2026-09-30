@@ -195,46 +195,46 @@
       text-decoration: none;
     }
   </style>
-</head>
+<link rel="stylesheet" href="./ui-common.css"><link rel="stylesheet" href="./launcher.css"></head>
 <body>
   <div class="container">
     <header>
-      <div class="badge">🧠 L@SSEN AI • MaleCNS 2026</div>
+      <div class="badge"> L@SSEN AI • MaleCNS 2026</div>
       <h1>초파리 뇌 로봇 조종 시뮬레이터</h1>
       <p class="subtitle">
         수컷 초파리의 166,700개 뉴런 커넥톰 배선 지도를 브라우저에서 직접 구동하고,<br>
-        실시간 뇌 신경망 파동으로 로봇과 2D 초파리의 움직임을 관찰하세요.
+        실시간 뇌 신경망 파동으로 로봇과 3D 초파리의 움직임을 관찰하세요.
       </p>
     </header>
 
     <div class="grid">
       <!-- App 1: fly-walk -->
       <div class="card">
-        <div class="card-icon">🪰</div>
+        <img class="experiment-preview" src="./assets/previews/fly.png" alt="시뮬레이터의 3D 초파리" width="960" height="600">
         <h2>초파리 뇌 걷기 시뮬레이터</h2>
-        <p>2D 초파리 + 3D 실시간 뇌 신경망 발화 시뮬레이션입니다. 설치 없이 웹 브라우저에서 즉시 실행됩니다.</p>
+        <p>3D 초파리 + 3D 실시간 뇌 신경망 발화 시뮬레이션입니다. 설치 없이 웹 브라우저에서 즉시 실행됩니다.</p>
         <a href="./fly-walk/" class="btn btn-primary">
-          ▶ 실행하기 (fly-walk)
+          실행하기 (fly-walk)
         </a>
       </div>
 
       <!-- App 2: fly-bodies -->
       <div class="card">
-        <div class="card-icon">🤖</div>
-        <h2>한 뇌, 여러 몸 (Multi-Body)</h2>
+        <img class="experiment-preview" src="./assets/previews/robots.png" alt="시뮬레이터의 유니트리 Go1" width="960" height="600">
+        <h2>하나의 뇌, 다채로운 몸</h2>
         <p>유니트리 Go1 로봇 개, 로봇 싸커 킷, 마이크로덕, G1 휴머노이드를 3D 웹 물리 엔진(MuJoCo)으로 구동합니다.</p>
         <a href="./fly-bodies/dist/" class="btn btn-green">
-          ▶ 실행하기 (fly-bodies)
+          실행하기 (fly-bodies)
         </a>
       </div>
 
       <!-- App 3: fly-duck -->
       <div class="card">
-        <div class="card-icon">🦆</div>
+        <img class="experiment-preview" src="./assets/previews/compare.png" alt="커넥톰 비교에 사용하는 마이크로덕" width="960" height="600">
         <h2>FlyWire vs MaleCNS 커넥톰 시뮬레이션</h2>
-        <p>2024 암컷 뇌(FlyWire)와 2026 수컷 뇌(MaleCNS)의 커넥톰 배선 및 실시간 행동 차이를 비교 관찰합니다.</p>
-        <a href="./fly-duck/compare.html" class="btn btn-purple">
-          ▶ 실행하기 (fly-duck)
+        <p>같은 마이크로덕과 같은 목표로 2024 FlyWire와 2026 MaleCNS의 반응을 비교합니다.</p>
+        <a href="./fly-duck/dist/compare.html" class="btn btn-purple">
+          실행하기 (fly-duck)
         </a>
       </div>
     </div>

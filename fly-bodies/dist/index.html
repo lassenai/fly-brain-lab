@@ -6,15 +6,14 @@
   <title>하나의 뇌, 다채로운 몸 — L@SSEN AI Physical AI 실험실</title>
   <meta name="description" content="2026 수컷 초파리 뇌 배선을 물통(LIF) 모델로 돌리고 로봇 개, 오리, 휴머노이드를 조종하는 L@SSEN AI Physical AI 실험실입니다.">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ctext y='32' font-size='32'%3E🐕%3C/text%3E%3C/svg%3E">
-  <script type="module" crossorigin src="./assets/index-5f7GNSRB.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CB485CfV.css">
+  <script type="module" crossorigin src="./assets/index-D04J3LBn.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CGNJSOPF.css">
 </head>
 <body>
   <div id="loading">
     <div>몸을 바꾸는 중…</div>
     <progress id="prog" value="0" max="100"></progress>
-    <small id="progText"></small>
+    <small id="progText"></small><button id="retry" type="button">다시 불러오기</button>
   </div>
 
   <header>
@@ -25,39 +24,38 @@
         <small>Link, AI, Solution · Physical AI</small>
       </div>
     </a>
-    <div class="header-right">
+    <div class="header-right"><a class="lab-back" href="../index.html" id="home-link">실험실로 돌아가기</a>
       <div class="partner-logos">
         <img src="./brand/nsu_ai_procurement.png" alt="남서울대학교 AI공공조달학과" class="partner-logo">
         <img src="./brand/nsu_ai_meta.png" alt="남서울대학교 AI메타융합학과" class="partner-logo">
       </div>
-      <a class="sub" href="https://www.youtube.com/@LASSEN-AI?sub_confirmation=1" target="_blank" rel="noopener">▶ 구독하기</a>
+      <a class="sub" href="https://www.youtube.com/@LASSEN-AI?sub_confirmation=1" target="_blank" rel="noopener">구독하기</a>
     </div>
   </header>
 
   <main>
     <p class="kicker">PHYSICAL AI · 초파리 뇌 배선 지도 (MALE CNS 2026)</p>
-    <h1>하나의 뇌, <em>다채로운 몸.</em></h1>
+    <h1>하나의 뇌, 다채로운 몸</h1><p class="compare-only">마이크로덕 · 비교 대상 고정</p>
     <p class="lede">2026년 9월 공개된 수컷 초파리 뇌 배선을 브라우저에서 물통(LIF) 모델로 돌리고, 로봇 개·마이크로덕·휴머노이드를 조종합니다. 탭으로 몸과 환경을 바꿔도 뇌는 그대로입니다.</p>
 
     <!-- 몸 선택 탭 -->
-    <div class="tabs">
-      <button type="button" class="tab" data-body="go1" aria-pressed="true">🐕 유니트리 Go1 <small>로봇 개 (관절 12개)</small></button>
-      <button type="button" class="tab" data-body="soccer_kit">⚽ 로봇 사커 킷 <small>옴니휠 로봇 (관절 4개)</small></button>
-      <button type="button" class="tab" data-body="duck">🦆 마이크로덕 <small>오리 로봇 (관절 14개)</small></button>
-      <button type="button" class="tab" data-body="g1">🤖 유니트리 G1 <small>휴머노이드 (관절 29개)</small></button>
-      <button type="button" class="tab" data-body="bh">🤖 버클리 휴머노이드 <small>휴머노이드 (관절 12개)</small></button>
-      <button type="button" class="tab" data-body="t1">🤖 부스터 T1 <small>휴머노이드 (관절 23개)</small></button>
-      <button type="button" class="tab" data-body="company">🏢 AI 네이티브 회사 <small>비즈니스 시뮬레이터</small></button>
+    <div class="tabs body-tabs">
+      <button type="button" class="tab" data-body="go1" aria-pressed="true"><img class="robot-thumbnail" src="./thumbnails/go1.png" alt="" width="96" height="64"><span class="robot-label">유니트리 Go1 <small>로봇 개 (관절 12개)</small></span></button>
+      <button type="button" class="tab" data-body="soccer_kit"><img class="robot-thumbnail" src="./thumbnails/soccer_kit.png" alt="" width="96" height="64"><span class="robot-label">로봇 사커 킷 <small>옴니휠 로봇 (관절 4개)</small></span></button>
+      <button type="button" class="tab" data-body="duck"><img class="robot-thumbnail" src="./thumbnails/duck.png" alt="" width="96" height="64"><span class="robot-label">마이크로덕 <small>오리 로봇 (관절 14개)</small></span></button>
+      <button type="button" class="tab" data-body="g1"><img class="robot-thumbnail" src="./thumbnails/g1.png" alt="" width="96" height="64"><span class="robot-label">유니트리 G1 <small>휴머노이드 (관절 29개)</small></span></button>
+      <button type="button" class="tab" data-body="bh"><img class="robot-thumbnail" src="./thumbnails/bh.png" alt="" width="96" height="64"><span class="robot-label">버클리 휴머노이드 <small>휴머노이드 (관절 12개)</small></span></button>
+      <button type="button" class="tab" data-body="t1"><img class="robot-thumbnail" src="./thumbnails/t1.png" alt="" width="96" height="64"><span class="robot-label">부스터 T1 <small>휴머노이드 (관절 23개)</small></span></button>
     </div>
     <p class="bodyinfo" id="bodyInfo"></p>
 
     <!-- 로봇 관절 게이지 -->
-    <div class="jointbox">
+    <details class="joint-details"><summary>로봇 모델과 관절 보기</summary><div class="jointbox">
       <span class="label" id="jointLabel">로봇 관절 12개 (강화학습 정책이 매 0.02초 정하는 목표)</span>
       <div id="joints"></div>
     </div>
 
-    <!-- 환경 선택 탭 -->
+    </details><!-- 환경 선택 탭 -->
     <div class="tabs envs">
       <span class="label">환경:</span>
       <button type="button" class="tab mini" data-env="flat" aria-pressed="true">평지</button>
@@ -77,11 +75,9 @@
           <span class="count" id="count"></span>
         </div>
         <div id="world"></div>
-        <div id="chartHost" class="charthost" hidden></div>
-        <div class="hint" id="sceneHint"><b>💡 클릭하여 바나나 놓기</b>화면을 눌러 바나나 위치를 이동시키세요.</div>
-        <div class="hint" id="coHint" hidden><b>🏢 AI 회사 시뮬레이션</b>전진 명령=광고비, 회전 명령=가격 설정</div>
+        <div class="hint" id="sceneHint"><b> 클릭하여 바나나 놓기</b>화면을 눌러 바나나 위치를 이동시키세요.</div>
       </div>
-      <div class="panel brain-panel">
+      <div class="observer-column"><div class="panel brain-panel">
         <div class="panel-top brain-panel-top">
           <b id="brainTitle">초파리 뇌 · 실시간 발화</b>
           <span id="brainStat">뉴런 166,700 · 운동뉴런 815</span>
@@ -94,39 +90,11 @@
           <span><i style="background:#fff176"></i>운동뉴런</span>
         </div>
       </div>
+<section class="profile-panel" id="profilePanel"><div class="profile-head"><b id="profileName">몸별 제어 설정</b><span class="tag" id="profileState">후보 · 검증 전</span></div>
+<div class="profile-fields"><label>전진 한도 <output id="profileVxValue"></output><input id="profileVx" type="range" min="0.05" max="0.7" step="0.001"></label><label>회전 한도 <output id="profileWzValue"></output><input id="profileWz" type="range" min="0.05" max="1.5" step="0.01"></label><label>명령 평활화 <output id="profileTauValue"></output><input id="profileTau" type="range" min="0" max="1" step="0.01"></label></div>
+<div class="profile-actions"><button id="profileApply" class="primary">설정 적용 후 정지</button><button id="profileCandidate">몸별 후보값</button><button id="profileBaseline">기존 명령 한도</button></div><p id="profileMsg" class="ui-status" role="status">기본은 기존 한도입니다. 후보값은 비교 시험으로 확인하세요. 로봇마다 독립 저장합니다.</p><details><summary>현재 로봇의 프로필 비교 시험</summary><p class="ui-status">평지에서 기존 한도·후보·회전 70% 설정을 같은 5개 시드와 앞/좌/우 목표로 비교합니다. 도달·넘어짐·목표 접근을 측정해 현재 시험의 우수 설정을 적용합니다.</p><label class="ui-status">시험당 시뮬레이션 시간 <input id="profileEvalSeconds" type="number" min="1" max="30" value="30" style="width:65px">초</label><div class="profile-actions"><button id="profileEval">설정 비교 시험 시작</button><button id="profileEvalStop" hidden>시험 중단</button></div><p class="ui-status" id="profileEvalMsg" role="status">5개 시드 × 3개 설정. 실제 계산 시간은 기기마다 다릅니다.</p><pre id="profileRanking" class="ui-status" style="white-space:pre-wrap"></pre></details></section></div>
     </div>
 
-    <!-- 실시간 텔레메트리 바 -->
-    <div class="flow">
-      <div><small>냄새 (L · R)</small><b id="fIn">0.00 · 0.00</b><i>센서 자극</i></div>
-      <div><small>촉각 (L · R)</small><b id="fTouch">0.00 · 0.00</b><i>더듬이 충돌</i></div>
-      <div><small>ALPN 투사뉴런</small><b id="fAL">0% · 0%</b><i>냄새 인식</i></div>
-      <div><small>DN 하강뉴런</small><b id="fDN">0.00%</b><i>뇌→척수 명령</i></div>
-      <div><small>MN 운동뉴런</small><b id="fMot">0.00 · 0.00%</b><i>발화율 (좌·우)</i></div>
-      <div><small>틱당 발화수</small><b id="fSpk">0</b><i>실시간 발화</i></div>
-      <div><small>명령 (전진·회전)</small><b id="fCmd">0.00 m/s</b><i>디코더 출력</i></div>
-      <div><small>이동 거리 / 현금</small><b id="fDist">0.00 m</b><i>누적</i></div>
-      <div><small>정책 호출</small><b id="fPol">0</b><i>스텝 수</i></div>
-    </div>
-
-    <!-- 두뇌 교체 탭 -->
-    <div class="tabs brains">
-      <span class="label">두뇌 선택:</span>
-      <button type="button" class="tab mini" data-brain="fly" aria-pressed="true">🪰 초파리 뇌 (복사)</button>
-      <button type="button" class="tab mini" data-brain="rule">📏 규칙 두뇌</button>
-      <button type="button" class="tab mini" data-brain="random">🎲 무작위 두뇌</button>
-      <button type="button" class="tab mini" data-brain="custom">✍️ 내 두뇌 (코드)</button>
-    </div>
-    <p class="bodyinfo" id="brainNote"></p>
-    <div class="custombox" id="customBox" hidden>
-      <textarea id="customCode" rows="10"></textarea>
-      <div class="row">
-        <button type="button" class="primary" id="customApply">내 두뇌 적용하기</button>
-        <span class="hint" id="brainMsg" role="status"></span>
-      </div>
-    </div>
-
-    <!-- 조종 컨트롤 -->
     <div class="controls">
       <span class="label">조종 & 실험:</span>
       <button type="button" id="reset">위치 리셋</button>
@@ -142,8 +110,42 @@
       <button type="button" data-scent="-1">왼쪽 ↖</button>
       <button type="button" data-scent="1">오른쪽 ↗</button>
     </div>
+<!-- 실시간 텔레메트리 바 -->
+    <div class="flow">
+      <div><small>냄새 (L · R)</small><b id="fIn">0.00 · 0.00</b><i>센서 자극</i></div>
+      <div><small>촉각 (L · R)</small><b id="fTouch">0.00 · 0.00</b><i>더듬이 충돌</i></div>
+      <div><small>ALPN 투사뉴런</small><b id="fAL">0% · 0%</b><i>냄새 인식</i></div>
+      <div><small>DN 하강뉴런</small><b id="fDN">0.00%</b><i>뇌→척수 명령</i></div>
+      <div><small>MN 운동뉴런</small><b id="fMot">0.00 · 0.00%</b><i>발화율 (좌·우)</i></div>
+      <div><small>틱당 발화수</small><b id="fSpk">0</b><i>실시간 발화</i></div>
+      <div><small>명령 (전진·회전)</small><b id="fCmd">0.00 m/s</b><i>디코더 출력</i></div>
+      <div><small>이동 거리 / 현금</small><b id="fDist">0.00 m</b><i>누적</i></div>
+      <div><small>정책 호출</small><b id="fPol">0</b><i>스텝 수</i></div>
+    </div>
 
-    <!-- 두뇌 성적표 -->
+    <details class="advanced"><summary>두뇌와 자극 상세 실험</summary><!-- 두뇌 교체 탭 -->
+    <div class="tabs brains">
+      <span class="label">두뇌 선택:</span>
+      <button type="button" class="tab mini" data-brain="fly" aria-pressed="true"> 초파리 뇌 (복사)</button>
+      <button type="button" class="tab mini" data-brain="rule"> 규칙 두뇌</button>
+      <button type="button" class="tab mini" data-brain="random"> 무작위 두뇌</button>
+      <button type="button" class="tab mini" data-brain="custom"> 내 두뇌 (코드)</button>
+    </div>
+    <p class="bodyinfo" id="brainNote"></p>
+    <div class="custombox" id="customBox" hidden>
+      <textarea id="customCode" aria-label="사용자 두뇌 코드" rows="10"></textarea>
+      <div class="row">
+        <button type="button" class="primary" id="customApply">내 두뇌 적용하기</button>
+        <span class="hint" id="brainMsg" role="status"></span>
+      </div>
+    </div>
+
+    </details><!-- 조종 컨트롤 -->
+
+
+
+<section class="diagnostics"><div><small>실제 전진 속도</small><b id="actualForward">0.00 m/s</b></div><div><small>실제 회전 속도</small><b id="actualTurn">0.00 rad/s</b></div><div><small>회전 진단</small><b id="spinState">준비 중</b></div></section>
+<details class="eval-details"><summary>환경별 성적표</summary><!-- 두뇌 성적표 -->
     <div class="evalbox">
       <div class="evalhead">
         <div>
@@ -151,10 +153,10 @@
           <p class="hint">현재 장착된 두뇌와 몸으로 5개 환경을 순차 시험하여 바나나 수집 및 안정성을 채점합니다.</p>
         </div>
         <div class="evalctl">
-          <label>환경별 시간: <input id="evalSecs" type="number" value="30"> 초</label>
+          <label>환경별 시간: <input id="evalSecs" type="number" value="30" min="1" max="120"> 초</label>
           <button type="button" class="primary" id="evalBtn">성적표 시작</button>
           <button type="button" id="evalStop" hidden>중단</button>
-          <button type="button" id="evalCopy">📋 결과 복사</button>
+          <button type="button" id="evalCopy"> 결과 복사</button>
         </div>
       </div>
       <p class="bodyinfo" id="evalMsg" style="margin-top:8px"></p>
@@ -171,7 +173,7 @@
       </table>
     </div>
 
-    <div class="honest">
+    </details><div class="honest">
       - 뇌 배선은 진짜 2026 MaleCNS 수컷 초파리 배선(뉴런 166,700개)이며 물통(LIF) 모델로 동작합니다.<br>
       - 걸음과 균형은 공개 강화학습 정책이 만들고, 초파리 뇌는 방향만 정합니다.
     </div>
@@ -181,5 +183,6 @@
     </footer>
   </main>
 
+  <script>if(location.pathname.includes('/dist/'))document.getElementById('home-link').href='../../index.html';</script>
 </body>
 </html>

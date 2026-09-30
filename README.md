@@ -19,7 +19,7 @@ Run the simulators instantly in any modern web browser without installing additi
 |---|---|---|
 | 🪰 **fly-walk** | **Fruit Fly Walk** — 2D Fruit Fly + Real-time 3D Brain Neural Spiking Simulation | [Launch Now](https://lassenai.github.io/fly-brain-lab/fly-walk/) |
 | 🤖 **fly-bodies** | **One Brain, Multiple Bodies** — Unitree Go1 Quadruped, Soccer Kit, MicroDuck, Unitree G1 Humanoid (MuJoCo WASM + ONNX Web) | [Launch Now](https://lassenai.github.io/fly-brain-lab/fly-bodies/dist/) |
-| 🦆 **fly-duck** | **FlyWire vs MaleCNS** — Connectome Comparative Analysis (2024 Female vs 2026 Male CNS) | [Launch Now](https://lassenai.github.io/fly-brain-lab/fly-duck/compare.html) |
+| 🦆 **fly-duck** | **FlyWire vs MaleCNS** — Connectome Comparative Analysis (2024 Female vs 2026 Male CNS) | [Launch Now](https://lassenai.github.io/fly-brain-lab/fly-duck/dist/compare.html) |
 
 ---
 
@@ -44,13 +44,19 @@ fly_brain_lab/
 
 ## 💻 How to Run Locally
 
-### 1. Run with Python HTTP Server (Easiest Method)
+### 1. Build both apps and start the local preview
 Open PowerShell or your terminal in the workspace root directory and run:
 
 ```bash
-python -m http.server 8000
+npm --prefix fly-bodies ci
+npm --prefix fly-duck ci
+npm --prefix fly-bodies run build
+npm --prefix fly-duck run build
+node scripts/preview.cjs
 ```
-Then open **`http://localhost:8000`** in your browser to launch the portal.
+Then open **`http://127.0.0.1:8770`** in your browser to launch the portal.
+
+Run the per-robot profile comparison from the control panel. It compares baseline limits and two candidates using five shared seeds on flat terrain; its winner is specific to those conditions. The brain comparison fixes both bodies to MicroDuck with one shared profile and acknowledged simulation ticks.
 
 ### 2. Run with Node.js Dev Server (For modifying `fly-bodies` source)
 ```bash

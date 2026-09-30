@@ -1,3 +1,4 @@
+import {setupWalkObservatory} from './observatory.js';
 // 초파리 뇌 걷기 — 3D 경기장 + 실시간 3D 초파리 무대. 뇌: MaleCNS 2026 (워커 물통 모델).
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -22,11 +23,12 @@ const W = 4.0;
 const state = { x: 0, y: 0, yaw: Math.PI / 2, v: 0, w: 0, legPhase: [0, 0], collected: 0, banana: { x: 0.5, y: 0.9 }, respawnAt: 0, steps: [], stepAcc: 0, pulse: 0 };
 const lab = { antenna: 'normal', range: 1.25, light: 0.45 };
 let activity = null, ready = false, cut = false, lastT = performance.now(), brainView = null, autoRotate = true;
+let paused=false,playbackRate=1,pendingSingleStep=false;
 
 // ---- Three.js 3D 씬 구축 ----
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#0d0a06');
-scene.fog = new THREE.FogExp2('#0d0a06', 0.12);
+scene.background = new THREE.Color('#f5f2eb');
+scene.fog = new THREE.Fog('#f5f2eb',8,25);
 
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 50);
 camera.position.set(0, 3.4, 3.6);
@@ -46,26 +48,26 @@ function resize() {
 new ResizeObserver(resize).observe(container);
 
 // 조명
-scene.add(new THREE.AmbientLight(0xfff5e6, 0.9));
-const sun = new THREE.DirectionalLight(0xffd700, 2.2);
+scene.add(new THREE.HemisphereLight(0xffffff,0xd0cbbd,1.8));
+const sun = new THREE.DirectionalLight(0xfff8eb, 2.2);
 sun.position.set(-2.5, 5, 3);
 sun.castShadow = true;
 sun.shadow.mapSize.set(1024, 1024);
 scene.add(sun);
 
-const pointLight = new THREE.PointLight(0xffb020, 1.8, 6);
+const pointLight = new THREE.PointLight(0x6b7036, 1, 6);
 pointLight.position.set(0, 1.2, 0);
 scene.add(pointLight);
 
 // 경기장 바닥 (3D Circle & Grid)
-const floorGeo = new THREE.CylinderGeometry(2.1, 2.1, 0.08, 64);
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x16120b, roughness: 0.75, metalness: 0.15 });
+const floorGeo = new THREE.BoxGeometry(12, .08, 12);
+const floorMat = new THREE.MeshStandardMaterial({ color: 0xe5e0d4, roughness: .9, metalness: .05 });
 const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.position.y = -0.04;
 floor.receiveShadow = true;
 scene.add(floor);
 
-const grid = new THREE.GridHelper(4.0, 20, 0xd4af37, 0x443622);
+const grid = new THREE.GridHelper(12, 60, 0x9b9588, 0xd0c9bb);
 grid.position.y = 0.001;
 scene.add(grid);
 
@@ -74,7 +76,8 @@ const ringMat = new THREE.MeshBasicMaterial({ color: 0xd4af37, side: THREE.Doubl
 const ring = new THREE.Mesh(ringGeo, ringMat);
 ring.rotation.x = -Math.PI / 2;
 ring.position.y = 0.002;
-scene.add(ring);
+// The fly movement bounds remain unchanged; the floor now extends past them.
+ring.visible=false;
 
 // ---- DeepMind MuJoCo flybody 해부학 3D 초파리(Drosophila melanogaster) 메쉬 생성 ----
 function create3DFly() {
@@ -298,7 +301,7 @@ const banana3D = create3DBanana();
 
 // 3D 궤적 (Trail Line)
 const trailGeo = new THREE.BufferGeometry();
-const trailMat = new THREE.LineDashedMaterial({ color: 0xffd700, dashSize: 0.04, gapSize: 0.04, transparent: true, opacity: 0.7 });
+const trailMat = new THREE.LineDashedMaterial({ color: 0x000000, dashSize: 0.04, gapSize: 0.04, transparent: true, opacity: 0.7 });
 const trailLine = new THREE.Line(trailGeo, trailMat);
 scene.add(trailLine);
 const trailPts = [];
@@ -357,15 +360,17 @@ worker.onmessage = ({ data: m }) => {
     maybeStart();
   } else if (m.type === 'activity') {
     activity = m;
+    if(m.requestId==='single-step'&&pendingSingleStep){step(.1,true);pendingSingleStep=false;$('singleStep').disabled=false;}
     if (brainView && m.fireState) brainView.update(m.fireState);
   } else if (m.type === 'error') {
+    pendingSingleStep=false;paused=true;$('singleStep').disabled=false;
     $('loading').hidden = false;
     $('loading').firstElementChild.textContent = '오류: ' + m.message;
   }
 };
 
 worker.postMessage({ type: 'init', graphUrl: new URL('./brain/connectome.bin.gz', location.href).href, metaUrl: new URL('./brain/channels.json?v=3', location.href).href });
-createBrainView($('brain'), { low: matchMedia('(max-width:900px)').matches, dir: './brain', autoRotate: true, shell: false, baseAlpha: .17, pointScale: matchMedia('(max-width:900px)').matches ? 1.0 : 1.45, groupGain: { 0: 1.2, 1: 1, 2: .22, 3: .9, 4: 1.3 }, channelColors: { olfactory_left: 0xffb020, olfactory_right: 0xffb020, ALPN_left: 0xffd60a, ALPN_right: 0xffd60a, descending_left: 0xff7a3d, descending_right: 0xff7a3d, motor_left: 0xfff176, motor_right: 0xfff176 } }).then(v => { brainView = v; viewReady = true; maybeStart(); }).catch(e => { $('loading').firstElementChild.textContent = '뇌 그림 오류: ' + e.message; });
+createBrainView($('brain'), { low: new URLSearchParams(location.search).has('low'), dir: './brain', autoRotate: true, shell: true, baseAlpha: .065, pointScale: 1.1, groupGain: { 0: 1.2, 1: 1, 2: .22, 3: .9, 4: 1.3 }, channelColors: { olfactory_left: 0xffb020, olfactory_right: 0xffb020, ALPN_left: 0xffd60a, ALPN_right: 0xffd60a, descending_left: 0xff7a3d, descending_right: 0xff7a3d, motor_left: 0xfff176, motor_right: 0xfff176 } }).then(v => { brainView = v; viewReady = true; maybeStart(); }).catch(e => { $('loading').firstElementChild.textContent = '뇌 그림 오류: ' + e.message; });
 setInterval(() => { if (ready) worker.postMessage({ type: 'stimulus', value: stimulus() }); }, 100);
 
 // ---- 3D 바나나 배치 ----
@@ -391,17 +396,19 @@ renderer.domElement.addEventListener('pointerup', e => {
   const intersects = raycaster.intersectObject(floor);
   if (intersects.length > 0) {
     const p = intersects[0].point;
-    if (Math.hypot(p.x, p.z) < 1.85) {
+    if (Math.abs(p.x) < 1.85 && Math.abs(p.z) < 1.85) {
       placeBanana(p.x, -p.z);
     }
   }
 });
 
 $('clear').onclick = () => { state.banana = null; state.respawnAt = 0; banana3D.root.visible = false; };
+$('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'재개':'일시정지';$('statusText').textContent=paused?'일시정지':'작동 중';worker.postMessage({type:paused?'stop':'start'});};
 for (const b of document.querySelectorAll('[data-antenna]')) b.onclick = () => { for (const o of document.querySelectorAll('[data-antenna]')) o.setAttribute('aria-pressed', String(o === b)); lab.antenna = b.dataset.antenna; };
 $('cut').onclick = () => { cut = !cut; $('cut').setAttribute('aria-pressed', String(cut)); $('cut').textContent = cut ? '시냅스 켜기' : '시냅스 끄기'; worker.postMessage({ type: 'cut', value: cut }); };
 $('rotate').onclick = () => { autoRotate = !autoRotate; $('rotate').setAttribute('aria-pressed', String(autoRotate)); brainView?.setAutoRotate?.(autoRotate); };
 $('reset').onclick = () => {
+  pendingSingleStep=false;$('singleStep').disabled=false;activity=null;lab.antenna='normal';cut=false;worker.postMessage({type:'cut',value:false});$('cut').setAttribute('aria-pressed','false');$('cut').textContent='시냅스 끄기';for(const b of document.querySelectorAll('[data-antenna]'))b.setAttribute('aria-pressed',String(b.dataset.antenna==='normal'));observatory.reset();
   Object.assign(state, { x: 0, y: 0, yaw: Math.PI / 2, v: 0, w: 0, legPhase: [0, 0], collected: 0, banana: { x: 0.5, y: 0.9 }, respawnAt: 0, steps: [], stepAcc: 0, pulse: 1 });
   trailPts.length = 0;
   placeBanana(0.5, 0.9);
@@ -409,9 +416,16 @@ $('reset').onclick = () => {
   brainView?.resetView();
 };
 
+const observatory=setupWalkObservatory({state,lab,legs:fly3D.legs,scene,getActivity:()=>activity,getStimulus:stimulus,
+ setRate:rate=>{playbackRate=rate;worker.postMessage({type:'speed',value:rate});},
+ singleStep:()=>{if(!ready||pendingSingleStep)return;paused=true;pendingSingleStep=true;$('singleStep').disabled=true;$('pause').textContent='재개';$('statusText').textContent='한 단계 관찰 · 일시정지';worker.postMessage({type:'stop'});worker.postMessage({type:'step',requestId:'single-step',stimulus:stimulus()});},
+ experiment:key=>{$('reset').click();if(key==='target')placeBanana(-.9,.8);if(key==='antenna')document.querySelector('[data-antenna="noLeft"]').click();if(key==='synapses')$('cut').click();}
+});
+
 // ---- 물리 및 애니메이션 ----
-function step(dt) {
-  if (!ready) return;
+function step(dt,force=false) {
+  if (!ready || (paused&&!force)) return;
+  const previous={x:state.x,y:state.y,yaw:state.yaw};
   const c = activity?.command || { forward: 0, turn: 0 };
   state.v += (c.forward * 1.6 - state.v) * Math.min(1, dt * 4);
   state.w += (c.turn - state.w) * Math.min(1, dt * 4);
@@ -443,18 +457,20 @@ function step(dt) {
   }
 
   state.pulse = Math.max(0, state.pulse - dt * 0.9);
+  observatory.sample(dt,previous);
 }
 
 // 3D 메쉬 동기화 및 렌더
 function draw() {
   const now = performance.now(), dt = Math.min(0.05, (now - lastT) / 1000);
   lastT = now;
-  step(dt);
+  step(dt*playbackRate);
   const s = stimulus();
 
   // 3D 초파리 위치 및 회전 반영 (z-up을 y-up 삼차원으로 매핑: (x, 0, -y))
   fly3D.root.position.set(state.x, 0, -state.y);
-  fly3D.root.rotation.y = state.yaw - Math.PI / 2;
+  // The model's head points along local +Z; world forward is (cos(yaw), 0, -sin(yaw)).
+  fly3D.root.rotation.y = state.yaw + Math.PI / 2;
 
   // 3D 더듬이 발화 표현
   fly3D.antMats[0].emissiveIntensity = 0.2 + s.olfactory_left * 1.5;
@@ -482,6 +498,7 @@ function draw() {
 
   // 수치 업데이트
   const a = activity || {};
+  $('walkForward').textContent=(a.command?.forward||0).toFixed(2);$('walkTurn').textContent=(a.command?.turn||0).toFixed(2);
   const pct = v => (100 * (v || 0)).toFixed(v > 0.001 ? 1 : 2);
   const setTxt = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
   const lvl = (id, v) => { const el = $(id); if (el) el.style.setProperty('--lvl', Math.max(0, Math.min(1, v))); };
@@ -492,8 +509,9 @@ function draw() {
   const dn = ((a.left || 0) + (a.right || 0)) / 2; setTxt('fDN', (100 * dn).toFixed(2)); lvl('n3', dn * 120);
   setTxt('fML', (100 * (a.motorLeft || 0)).toFixed(2)); setTxt('fMR', (100 * (a.motorRight || 0)).toFixed(2)); lvl('n4', Math.max(a.motorLeft || 0, a.motorRight || 0) * 400);
   setTxt('fFwd', (a.command?.forward || 0).toFixed(2)); setTxt('fTurn', (a.command?.turn || 0).toFixed(2) + ' rad/s'); setTxt('fSpk', (a.spikes || 0).toLocaleString()); lvl('n5', (a.command?.forward || 0) / .24);
-  setTxt('count', state.collected ? `🍌 먹은 바나나: ${state.collected}개` : '');
+  setTxt('count', state.collected ? ` 먹은 바나나: ${state.collected}개` : '');
 
+  observatory.update();
   controls.update();
   renderer.render(scene, camera);
   if (brainView) brainView.render();

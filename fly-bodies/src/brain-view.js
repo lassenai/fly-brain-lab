@@ -15,13 +15,13 @@ export async function createBrainView(host,{low=false,onProgress,dir='./brain',a
   tissue.translate(-center.x,-center.y,-center.z);tissue.scale(scale,-scale,-scale);tissue.computeVertexNormals();tissue.computeBoundingBox();
   const positions=new Float32Array(raw.length);
   for(let i=0;i<count;i++){positions[3*i]=(raw[3*i]-center.x)*scale;positions[3*i+1]=-(raw[3*i+1]-center.y)*scale;positions[3*i+2]=-(raw[3*i+2]-center.z)*scale;}
-  const scene=new THREE.Scene();scene.background=new THREE.Color('#0b0e14');
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#23313e');
   const camera=new THREE.PerspectiveCamera(38,1,.01,30);camera.position.set(0,.05,3.8);
-  const renderer=new THREE.WebGLRenderer({antialias:!low});renderer.setPixelRatio(low?.7:Math.min(devicePixelRatio,1.5));renderer.localClippingEnabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
+  const renderer=new THREE.WebGLRenderer({antialias:!low});renderer.setPixelRatio(low?.7:Math.min(Math.max(devicePixelRatio,1.5),2));renderer.localClippingEnabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
   const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=1.4;controls.maxDistance=7;controls.enablePan=false;controls.autoRotate=!!autoRotate;controls.autoRotateSpeed=.55;controls.update();
   const clip=new THREE.Plane(new THREE.Vector3(0,0,-1),2);
   scene.add(new THREE.HemisphereLight(0xe6ecdc,0x1f3834,2));
-  const tissueMaterial=new THREE.MeshPhongMaterial({color:0xadc4b6,transparent:true,opacity:.10,depthWrite:false,side:THREE.DoubleSide,clippingPlanes:[clip]});
+  const tissueMaterial=new THREE.MeshPhongMaterial({color:0xadc4b6,transparent:true,opacity:.06,depthWrite:false,side:THREE.DoubleSide,clippingPlanes:[clip]});
   const tissueMesh=new THREE.Mesh(tissue,tissueMaterial);tissueMesh.visible=!!shell;scene.add(tissueMesh);
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
   const firing=new Float32Array(count),colors=new Float32Array(count*3);
@@ -32,19 +32,22 @@ export async function createBrainView(host,{low=false,onProgress,dir='./brain',a
   const boost=new Float32Array(count).fill(1);if(channelColors)for(const name of Object.keys(channelColors))for(const i of (metadata.channels[name]||[]))boost[i]=1.6;
   geometry.setAttribute('firing',new THREE.BufferAttribute(firing,1));geometry.setAttribute('cellColor',new THREE.BufferAttribute(colors,3));
   const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
-    uniforms:{cut:{value:2},pointScale:{value:pointScale??(low?.75:1.15)},baseAlpha:{value:baseAlpha??.12}},
-    vertexShader:`attribute float firing;attribute vec3 cellColor;varying vec3 color;varying float activity;varying float depth;uniform float pointScale;
-      void main(){color=cellColor;activity=firing;depth=position.z;vec4 p=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*p;gl_PointSize=pointScale*(1.1+2.4*sqrt(firing))/max(.65,-p.z*.5);}`,
+    uniforms:{pixelRatio:{value:renderer.getPixelRatio()},cut:{value:2},pointScale:{value:pointScale??(low?.75:1.15)},baseAlpha:{value:baseAlpha??.12}},
+    vertexShader:`attribute float firing;attribute vec3 cellColor;varying vec3 color;varying float activity;varying float depth;uniform float pointScale;uniform float pixelRatio;
+      void main(){color=cellColor;activity=firing;depth=position.z;vec4 p=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*p;gl_PointSize=pixelRatio*pointScale*(1.1+2.4*sqrt(firing))/max(.65,-p.z*.5);}`,
     fragmentShader:`uniform float cut;uniform float baseAlpha;varying vec3 color;varying float activity;varying float depth;
-      void main(){if(depth>cut)discard;float r=length(gl_PointCoord-.5);if(r>.5)discard;float alpha=(baseAlpha+.7*activity)*(1.-smoothstep(.1,.5,r));gl_FragColor=vec4(mix(color,vec3(.94,1.,.85),activity*.6),alpha);}`});
+      void main(){if(depth>cut)discard;float r=length(gl_PointCoord-.5);if(r>.5)discard;float alpha=(baseAlpha+.4*activity)*(1.-smoothstep(.1,.5,r));gl_FragColor=vec4(mix(color,vec3(.94,1.,.85),activity*.35),alpha);}`});
   const points=new THREE.Points(geometry,material);scene.add(points);
   let frames=0,active=0,sequence=0;
-  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
+  geometry.computeBoundingBox();
+  const viewBounds=geometry.boundingBox.clone().union(tissue.boundingBox),viewCenter=viewBounds.getCenter(new THREE.Vector3()),viewSize=viewBounds.getSize(new THREE.Vector3());
+  function fitView(){const distance=Math.max(viewSize.y,viewSize.x/camera.aspect)/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)))*1.25+viewSize.z*.5;camera.position.set(viewCenter.x,viewCenter.y,viewCenter.z+distance);camera.far=Math.max(30,distance*3);controls.target.copy(viewCenter);controls.maxDistance=Math.max(7,distance*2);camera.updateProjectionMatrix();controls.update();}
+  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;fitView();}
   new ResizeObserver(resize).observe(host);resize();
   function update(spikes){if(spikes.length!==count)throw Error('Anatomy spike indices do not match graph');active=0;for(let i=0;i<count;i++){firing[i]=Math.min(1,spikes[i]/2*gain[i]*boost[i]);if(spikes[i])active++;}geometry.attributes.firing.needsUpdate=true;sequence++;}
   function render(){if(!host.clientWidth||!host.clientHeight)return;controls.update();renderer.render(scene,camera);frames++;}
   function slice(percent){const min=tissue.boundingBox.min.z-.01,max=tissue.boundingBox.max.z+.01;const depth=min+(max-min)*percent/100;material.uniforms.cut.value=depth;clip.constant=depth;}
-  function resetView(){camera.position.set(0,.05,3.8);controls.target.set(0,0,0);controls.update();}
+  function resetView(){fitView();}
   return {update,render,slice,resetView,setShell:enabled=>tissueMesh.visible=enabled,setAutoRotate:v=>{controls.autoRotate=!!v;},
     state:()=>({neurons:count,active,frames,sequence,cut:material.uniforms.cut.value,meshVertices:tissue.attributes.position.count})};
 }

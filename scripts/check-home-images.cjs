@@ -1,0 +1,2 @@
+const {chromium}=require('../fly-bodies/node_modules/playwright');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});const p=await b.newPage({viewport:{width:1440,height:1000}});await p.goto('http://127.0.0.1:8770/');await p.screenshot({path:'docs/implemented-home.png',fullPage:true});const imgs=await p.locator('img').evaluateAll(xs=>xs.every(x=>x.complete&&x.naturalWidth>0));if(!imgs)throw Error('Missing image');await b.close()})().catch(e=>{console.error(e);process.exit(1)});

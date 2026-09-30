@@ -1,4 +1,9 @@
 node_modules/
-dist/
+dist/*
+!dist/compare.html
+!dist/assets/
+dist/assets/*
+!dist/assets/compare-*.js
+!dist/assets/compare-*.css
 test-results/
 *.log

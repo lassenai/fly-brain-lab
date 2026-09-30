@@ -9,13 +9,16 @@ async function fetchBuf(url, label) {
   const out = new Uint8Array(got); let o = 0; for (const c of chunks) { out.set(c, o); o += c.length; } return out.buffer;
 }
 function rates(brain, fire, steps, names) { const out = {}; for (const n of names) { const idx = brain.channels[n]; if (!idx) continue; let s = 0; for (const i of idx) s += fire[i]; out[n] = s / (idx.length * steps); } return out; }
-function loop() {
-  if (!running) return; const t = performance.now();
+function advance(requestId) {
   const a = brain.advance(stimulus, 10, {cutSynapses: cut});
   const d = decoder.update(a);
   const side = rates(brain, a.fireState, 10, ['motor_left', 'motor_right', 'olfactory_left', 'olfactory_right']);
   const fireBuf = a.fireState.slice().buffer;
-  self.postMessage({type: 'activity', left: a.left, right: a.right, scentLeft: a.scentLeft, scentRight: a.scentRight, motor: a.motor, motorLeft: side.motor_left || 0, motorRight: side.motor_right || 0, olfL: side.olfactory_left || 0, olfR: side.olfactory_right || 0, spikes: a.spikes, tick: a.tick, command: d.command, fireState: new Uint8Array(fireBuf)}, [fireBuf]);
+  self.postMessage({type: 'activity', requestId, left: a.left, right: a.right, scentLeft: a.scentLeft, scentRight: a.scentRight, motor: a.motor, motorLeft: side.motor_left || 0, motorRight: side.motor_right || 0, olfL: side.olfactory_left || 0, olfR: side.olfactory_right || 0, spikes: a.spikes, tick: a.tick, command: d.command, fireState: new Uint8Array(fireBuf)}, [fireBuf]);
+}
+function loop() {
+  if (!running) return; const t = performance.now();
+  advance();
   timer = setTimeout(loop, Math.max(0, 100 - (performance.now() - t)));
 }
 self.onmessage = async ({data: m}) => {
@@ -29,9 +32,10 @@ self.onmessage = async ({data: m}) => {
     } else if (m.type === 'start' && !running) { running = true; loop(); }
     else if (m.type === 'stop') { running = false; clearTimeout(timer); }
     else if (m.type === 'stimulus') stimulus = m.value;
-    else if (m.type === 'reset') { brain.reset(); decoder.reset(); }
+    else if (m.type === 'reset') { brain.initialSeed=Number.isInteger(m.seed)?m.seed:23; brain.reset(); decoder.reset(); cut=false; if(m.requestId)self.postMessage({type:'reset-done',requestId:m.requestId}); }
+    else if (m.type === 'step') { if(running)throw Error('동기화 중 자동 실행 금지'); stimulus=m.stimulus; advance(m.requestId); }
     else if (m.type === 'cut') { cut = m.value; brain.reset(); decoder.reset(); }
     else if (m.type === 'gain') brain.setGain(m.value);
     else if (m.type === 'lesion') self.postMessage({type: 'lesion', n: brain.setLesion(m.names)});
-  } catch (e) { running = false; self.postMessage({type: 'error', message: e.message}); }
+  } catch (e) { running = false; clearTimeout(timer); self.postMessage({type: 'error', requestId:m.requestId, message: e.message}); }
 };

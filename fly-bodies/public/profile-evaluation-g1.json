@@ -1,0 +1,276 @@
+{
+  "result": {
+    "cancelled": false,
+    "body": "g1",
+    "seconds": 30,
+    "seeds": [
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "brain": "male",
+    "dataVersion": "MaleCNS v1.0",
+    "profileVersion": "candidate-1",
+    "rows": [
+      {
+        "index": 0,
+        "profile": {
+          "schemaVersion": 1,
+          "version": "candidate-1",
+          "source": "baseline",
+          "maxForward": 0.6,
+          "maxTurn": 1,
+          "smoothingTau": 0,
+          "turnDeadband": 0,
+          "maxTurnAcceleration": 100,
+          "turnSlowdown": 0
+        },
+        "trials": [
+          {
+            "seed": 23,
+            "target": {
+              "x": 1.2,
+              "y": 0
+            },
+            "arrival": 2.1000000000000014,
+            "falls": 0,
+            "time": 2.1000000000000014,
+            "progress": 0.8535401391361261,
+            "rotation": 0.720593532461692,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 24,
+            "target": {
+              "x": 1,
+              "y": 0.8
+            },
+            "arrival": 2.3000000000000016,
+            "falls": 0,
+            "time": 2.3000000000000016,
+            "progress": 0.9319344064011736,
+            "rotation": 1.1324742272892143,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 25,
+            "target": {
+              "x": 1,
+              "y": -0.8
+            },
+            "arrival": 1.9000000000000012,
+            "falls": 0,
+            "time": 1.9000000000000012,
+            "progress": 0.9409224401975305,
+            "rotation": 1.197220770592295,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 26,
+            "target": {
+              "x": 1.2,
+              "y": 0
+            },
+            "arrival": 1.9000000000000012,
+            "falls": 0,
+            "time": 1.9000000000000012,
+            "progress": 0.8623361022849902,
+            "rotation": 0.6222962648988255,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 27,
+            "target": {
+              "x": 1,
+              "y": 0.8
+            },
+            "arrival": null,
+            "falls": 0,
+            "time": 29.99999999999945,
+            "progress": -1.9370078905379464,
+            "rotation": 28.150489318901965,
+            "spinningTicks": 0
+          }
+        ],
+        "successes": 4,
+        "falls": 0,
+        "progress": 0.3303450394963748,
+        "rotation": 6.364614822828798
+      },
+      {
+        "index": 2,
+        "profile": {
+          "schemaVersion": 1,
+          "version": "candidate-1",
+          "source": "candidate",
+          "maxForward": 0.45,
+          "maxTurn": 0.7,
+          "smoothingTau": 0.15,
+          "turnDeadband": 0.06,
+          "maxTurnAcceleration": 2,
+          "turnSlowdown": 0.3
+        },
+        "trials": [
+          {
+            "seed": 23,
+            "target": {
+              "x": 1.2,
+              "y": 0
+            },
+            "arrival": 2.1000000000000014,
+            "falls": 0,
+            "time": 2.1000000000000014,
+            "progress": 0.8601761198580553,
+            "rotation": 0.4510545041519426,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 24,
+            "target": {
+              "x": 1,
+              "y": 0.8
+            },
+            "arrival": null,
+            "falls": 0,
+            "time": 29.99999999999945,
+            "progress": 0.27721102779928675,
+            "rotation": 19.31875732412822,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 25,
+            "target": {
+              "x": 1,
+              "y": -0.8
+            },
+            "arrival": 3.1000000000000023,
+            "falls": 0,
+            "time": 3.1000000000000023,
+            "progress": 0.9430658525461604,
+            "rotation": 1.0223311959787953,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 26,
+            "target": {
+              "x": 1.2,
+              "y": 0
+            },
+            "arrival": 2.2000000000000015,
+            "falls": 0,
+            "time": 2.2000000000000015,
+            "progress": 0.8956163865160461,
+            "rotation": 0.43023445914554326,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 27,
+            "target": {
+              "x": 1,
+              "y": 0.8
+            },
+            "arrival": null,
+            "falls": 0,
+            "time": 29.99999999999945,
+            "progress": 0.47186202987488957,
+            "rotation": 19.63411704983907,
+            "spinningTicks": 0
+          }
+        ],
+        "successes": 3,
+        "falls": 0,
+        "progress": 0.6895862833188876,
+        "rotation": 8.171298906648715
+      },
+      {
+        "index": 1,
+        "profile": {
+          "schemaVersion": 1,
+          "version": "candidate-1",
+          "source": "candidate",
+          "maxForward": 0.45,
+          "maxTurn": 1,
+          "smoothingTau": 0.15,
+          "turnDeadband": 0.06,
+          "maxTurnAcceleration": 2,
+          "turnSlowdown": 0.3
+        },
+        "trials": [
+          {
+            "seed": 23,
+            "target": {
+              "x": 1.2,
+              "y": 0
+            },
+            "arrival": 2.2000000000000015,
+            "falls": 0,
+            "time": 2.2000000000000015,
+            "progress": 0.8937765545587211,
+            "rotation": 0.5478383978735661,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 24,
+            "target": {
+              "x": 1,
+              "y": 0.8
+            },
+            "arrival": null,
+            "falls": 0,
+            "time": 29.99999999999945,
+            "progress": -1.2392725160585325,
+            "rotation": 26.212503836008274,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 25,
+            "target": {
+              "x": 1,
+              "y": -0.8
+            },
+            "arrival": 2.5000000000000018,
+            "falls": 0,
+            "time": 2.5000000000000018,
+            "progress": 0.9620820245204003,
+            "rotation": 1.2477211353024698,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 26,
+            "target": {
+              "x": 1.2,
+              "y": 0
+            },
+            "arrival": 2.2000000000000015,
+            "falls": 0,
+            "time": 2.2000000000000015,
+            "progress": 0.8978872515688276,
+            "rotation": 0.4671870119661733,
+            "spinningTicks": 0
+          },
+          {
+            "seed": 27,
+            "target": {
+              "x": 1,
+              "y": 0.8
+            },
+            "arrival": null,
+            "falls": 0,
+            "time": 29.99999999999945,
+            "progress": -1.2439906756946892,
+            "rotation": 25.855270050667343,
+            "spinningTicks": 0
+          }
+        ],
+        "successes": 3,
+        "falls": 0,
+        "progress": 0.05409652777894545,
+        "rotation": 10.866104086363567
+      }
+    ]
+  },
+  "message": "현재 평지 시험에서 기존 한도를 적용했습니다. 다른 목표·환경에서 재검증하세요.",
+  "error": null
+}

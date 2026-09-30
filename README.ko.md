@@ -1,6 +1,6 @@
 # 초파리 뇌로 로봇을 조종하기 — L@SSEN AI 오픈소스
 
-2026년 9월 공개된 수컷 초파리 뇌 배선(MaleCNS, 뉴런 166,700개)을 웹 브라우저에서 물통(LIF) 모델로 구동하고, 그 출력으로 로봇 개·로봇 싸커 킷·오리·휴머노이드·2D 초파리를 움직이는 웹 기반 신경과학 & 로보틱스 실험실입니다. 
+2026년 9월 공개된 수컷 초파리 뇌 배선(MaleCNS, 뉴런 166,700개)을 웹 브라우저에서 물통(LIF) 모델로 구동하고, 그 출력으로 로봇 개·로봇 싸커 킷·오리·휴머노이드·3D 초파리를 움직이는 웹 기반 신경과학 & 로보틱스 실험실입니다.
 
 전부 사용자의 기기 안(브라우저)에서 계산되며, 별도의 서버나 계정이 필요 없습니다. **이 뇌는 학습하지 않습니다.** 걸음과 균형은 각 로봇이 강화학습으로 배운 공개 정책이 만들고, 초파리 뇌는 방향 및 자극 반응을 결정합니다.
 
@@ -16,9 +16,9 @@
 
 | 프로그램 | 무엇을 하는가 | 바로 보기 링크 |
 |---|---|---|
-| 🪰 **fly-walk** | 초파리 뇌 걷기 — 2D 초파리 + 실시간 3D 뇌 신경망 발화 시뮬레이션 | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-walk/) |
+| 🪰 **fly-walk** | 초파리 뇌 걷기 — 3D 초파리 + 실시간 3D 뇌 신경망 발화 시뮬레이션 | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-walk/) |
 | 🤖 **fly-bodies** | 한 뇌, 여러 몸 — 유니트리 Go1 로봇 개 · 로봇 싸커 킷 · 마이크로덕 · 유니트리 G1 휴머노이드 (MuJoCo WASM + ONNX) | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-bodies/dist/) |
-| 🦆 **fly-duck** | FlyWire vs MaleCNS 커넥톰 멀티-브레인 시뮬레이션 — 2024 암컷 vs 2026 수컷 뇌 배선 비교 관찰 | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-duck/compare.html) |
+| 🦆 **fly-duck** | FlyWire vs MaleCNS 커넥톰 멀티-브레인 시뮬레이션 — 2024 암컷 vs 2026 수컷 뇌 배선 비교 관찰 | [바로 실행](https://lassenai.github.io/fly-brain-lab/fly-duck/dist/compare.html) |
 
 ---
 
@@ -42,13 +42,19 @@ fly_brain_lab/
 
 ## 💻 로컬 PC에서 실행하는 방법
 
-### 1. Python 내장 웹 서버로 실행 (가장 간단함)
+### 1. 두 앱을 빌드하고 로컬 미리보기 실행
 PowerShell 또는 터미널을 열고 저장소 루트 폴더에서 다음 명령어를 실행합니다:
 
 ```bash
-python -m http.server 8000
+npm --prefix fly-bodies ci
+npm --prefix fly-duck ci
+npm --prefix fly-bodies run build
+npm --prefix fly-duck run build
+node scripts/preview.cjs
 ```
-실행 후 웹 브라우저 주소창에 **`http://localhost:8000`** 을 입력하면 메인 런처 화면이 열립니다.
+실행 후 웹 브라우저 주소창에 **`http://127.0.0.1:8770`** 을 입력하면 메인 런처 화면이 열립니다.
+
+프로필 비교 시험은 로봇별 제어 패널에서 실행할 수 있습니다. 기존 한도와 두 후보를 같은 5개 시드의 평지 시험으로 비교하며, 결과는 해당 시험 조건의 우수 설정입니다. 마이크로덕 뇌 비교는 양쪽에 동일한 프리셋을 사용하고 시뮬레이션 tick을 동기화합니다.
 
 ### 2. Node.js 개발 서버로 실행 (`fly-bodies` 소스 수정 시)
 ```bash
